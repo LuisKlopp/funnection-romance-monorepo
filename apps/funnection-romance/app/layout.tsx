@@ -6,8 +6,8 @@ import ReactQueryProvider from "@/providers/react-query-provider";
 import { dmDisplay, pretendard } from "@/public/fonts/fonts";
 
 export const metadata: Metadata = {
-  title: "Funnection Romance",
-  description: "Funnection Romance",
+  title: "퍼넥션 연애특집",
+  description: "퍼넥션 연애특집",
 };
 
 export default function RootLayout({

@@ -41,3 +41,13 @@ export const dmDisplay = localFont({
     },
   ],
 });
+
+export const jua = localFont({
+  src: [
+    {
+      path: "./Jua-Regular.woff",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+});

@@ -118,13 +118,16 @@ body,
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-romance-background text-romance-ink;
   }
   .font-outline-2 {
     -webkit-text-stroke: 1px #475569;
   }
   .font-outline-4 {
     -webkit-text-stroke: 4px black;
+  }
+  .font-jua {
+    font-family: "Jua", sans-serif;
   }
 }
 

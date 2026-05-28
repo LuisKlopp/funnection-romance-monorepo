@@ -41,10 +41,13 @@ const config = {
       backgroundImage: {
         "complex-gradient":
           "linear-gradient(to right, #000000 1%, #920028 100%)",
+        "romance-gradient":
+          "linear-gradient(135deg, #FFF9F4 0%, #FFE2D4 48%, #FFD5E2 100%)",
       },
 
       fontFamily: {
         pretendard: ["Pretendard", "sans-serif"],
+        jua: ["Jua", "sans-serif"],
         dmdisplay: ["var(--font-dmDisplay)", "serif"],
       },
 
@@ -86,6 +89,18 @@ const config = {
           7: "#374151",
           8: "#1F2937",
           9: "#111827",
+        },
+        romance: {
+          background: "#FFF9F4",
+          surface: "#FFFDFB",
+          tint: "#FFE8DD",
+          blush: "#FFD5E2",
+          highlight: "#D94C6A",
+          accent: "#8B2248",
+          ink: "#33242B",
+          muted: "#795E67",
+          line: "#F3B8C5",
+          mint: "#E76F83",
         },
         lightPurple: "#c9bdcb",
 
