@@ -15,10 +15,15 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
 /build
+
+# turbo
+.turbo/
+**/.turbo/
 
 # misc
 .DS_Store
