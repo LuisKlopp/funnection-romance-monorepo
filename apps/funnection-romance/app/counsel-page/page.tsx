@@ -156,7 +156,7 @@ export default function CounselPage() {
                     onClick={openCounsel}
                     className="btn-press-in bg-romance-accent shadow-soft-card flex h-14 min-w-[160px] items-center justify-center rounded-full border border-white/80 px-8 text-xl font-extrabold text-white transition hover:brightness-105"
                   >
-                    고민
+                    들어보기
                   </button>
                 ) : (
                   <>

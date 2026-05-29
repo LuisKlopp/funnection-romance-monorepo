@@ -75,6 +75,7 @@ export default function Home() {
             onChange={(event) => setCounsel(event.target.value)}
             maxLength={MAX_COUNSEL_LENGTH}
             placeholder="고민을 입력해주세요"
+            autoFocus
             className="text-romance-ink placeholder:text-romance-muted/45 focus:border-romance-accent focus:ring-romance-accent/20 mdl:min-h-[260px] min-h-[240px] w-full resize-none rounded-[24px] border border-white/85 bg-white/90 px-5 py-5 text-base font-semibold leading-relaxed outline-none transition focus:bg-white focus:ring-4"
             aria-label="익명 고민 입력"
           />
@@ -87,8 +88,14 @@ export default function Home() {
         <button
           type="submit"
           disabled={counselMutation.isPending}
-          className="btn-press-in bg-romance-accent shadow-soft-card flex h-10 w-full items-center justify-center rounded-full border border-white/80 text-base font-extrabold text-white transition hover:brightness-105 disabled:opacity-45"
+          className="btn-press-in bg-romance-accent shadow-soft-card flex h-11 w-full items-center justify-center gap-2 rounded-full border border-white/80 text-base font-extrabold text-white transition hover:brightness-105 disabled:opacity-45"
         >
+          {counselMutation.isPending && (
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2 border-white/45 border-t-white"
+              aria-hidden="true"
+            />
+          )}
           {counselMutation.isPending ? "제출 중" : "제출"}
         </button>
       </form>
