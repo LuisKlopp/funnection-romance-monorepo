@@ -40,6 +40,21 @@ body,
   box-shadow: 2px 2 24px rgba(255, 255, 255, 0.2);
 }
 
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 1s ease-out;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -152,4 +167,23 @@ body,
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+.answer-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 34, 72, 0.45) rgba(255, 241, 246, 0.7);
+}
+
+.answer-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.answer-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 241, 246, 0.7);
+  border-radius: 999px;
+}
+
+.answer-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 34, 72, 0.45);
+  border-radius: 999px;
 }

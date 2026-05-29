@@ -1,1 +1,1 @@
-export {};
+export { SubmitModal } from "./submit-modal";

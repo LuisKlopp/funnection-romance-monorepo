@@ -2,8 +2,9 @@
 
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { SubmitModal } from "@/components";
 import { CHOICE_ANSWERED_STORAGE_KEY } from "@/constants/choice-questions";
 
 type ChoiceAnswer = "O" | "X";
@@ -24,6 +25,22 @@ export const ChoiceDetailClient = ({
     O: 0,
     X: 0,
   });
+  const [showResults, setShowResults] = useState(false);
+  const [submittedAnswer, setSubmittedAnswer] = useState<ChoiceAnswer | null>(
+    null
+  );
+
+  const totalCount = counts.O + counts.X;
+
+  useEffect(() => {
+    if (!submittedAnswer) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setSubmittedAnswer(null);
+    }, 1500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [submittedAnswer]);
 
   const handleAnswerClick = (answer: ChoiceAnswer) => {
     if (selectedAnswer) return;
@@ -43,6 +60,7 @@ export const ChoiceDetailClient = ({
       ...prev,
       [answer]: prev[answer] + 1,
     }));
+    setSubmittedAnswer(answer);
   };
 
   return (
@@ -99,23 +117,44 @@ export const ChoiceDetailClient = ({
               />
             </div>
 
-            <div className="mdl:flex hidden w-full items-start justify-center gap-32">
-              <AnswerResult answer="O" count={counts.O} />
-              <AnswerResult answer="X" count={counts.X} />
+            <div className="mdl:flex hidden w-full flex-col items-center gap-10">
+              <div className="flex w-full items-start justify-center gap-32">
+                <AnswerResult
+                  answer="O"
+                  count={counts.O}
+                  showCount={showResults}
+                />
+                <AnswerResult
+                  answer="X"
+                  count={counts.X}
+                  showCount={showResults}
+                />
+              </div>
+
+              <p className="text-romance-muted/75 text-sm font-semibold">
+                현재 {totalCount}명이 답변했어요
+              </p>
+
+              {!showResults && (
+                <button
+                  type="button"
+                  onClick={() => setShowResults(true)}
+                  className="btn-press-in bg-romance-surface/90 text-romance-accent shadow-soft-card min-w-[150px] rounded-xl border border-white/80 px-6 py-4 text-xl font-extrabold backdrop-blur hover:bg-white"
+                >
+                  결과 확인
+                </button>
+              )}
             </div>
           </div>
         </div>
-
-        <footer className="mt-4 flex shrink-0 justify-between">
-          <Link
-            href="/"
-            className="btn-press-in bg-romance-surface/90 text-romance-accent shadow-soft-card mdl:min-w-[150px] mdl:text-base flex h-12 min-w-[128px] items-center justify-center gap-2 rounded-full border border-white/80 px-5 text-sm font-extrabold backdrop-blur hover:bg-white"
-          >
-            <Home className="h-5 w-5" />
-            Home
-          </Link>
-        </footer>
       </section>
+
+      {submittedAnswer && (
+        <SubmitModal
+          contents={`${submittedAnswer}로 제출됐습니다`}
+          overlayClassName="mdl:hidden"
+        />
+      )}
     </main>
   );
 };
@@ -141,29 +180,30 @@ const AnswerButton = ({
   selectedAnswer,
   onClick,
 }: AnswerButtonProps) => {
-  const isSelected = selectedAnswer === answer;
-  const isDimmed = !!selectedAnswer && !isSelected;
+  const isAnswered = !!selectedAnswer;
   const isPositive = answer === "O";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={!!selectedAnswer}
-      className={`btn-press-in shadow-soft-card flex min-h-[104px] flex-col items-center justify-center rounded-[24px] border px-6 py-5 transition ${
-        isSelected
-          ? isPositive
-            ? "border-[#2563eb] bg-[#2563eb] text-white"
-            : "border-[#dc2626] bg-[#dc2626] text-white"
+      disabled={isAnswered}
+      className={`btn-press-in shadow-soft-card min-h-17.5 flex flex-col items-center justify-center rounded-[20px] border px-6 py-3 transition ${
+        isAnswered
+          ? "border-romance-accent/25 bg-romance-accent/85 text-white opacity-70"
           : isPositive
             ? "border-[#bfdbfe] bg-white/90 text-[#2563eb] hover:bg-[#eff6ff]"
             : "border-[#fecaca] bg-white/90 text-[#dc2626] hover:bg-[#fef2f2]"
-      } ${isDimmed ? "opacity-55" : ""}`}
-      aria-label={`${answer} 선택`}
+      }`}
+      aria-label={isAnswered ? "답변 완료" : `${answer} 선택`}
     >
       <span
-        className={`text-[48px] font-extrabold leading-none ${
-          isPositive ? "text-shadow-01" : "text-shadow-02"
+        className={`text-[36px] font-extrabold leading-none ${
+          isAnswered
+            ? "text-shadow-01"
+            : isPositive
+              ? "text-shadow-01"
+              : "text-shadow-02"
         }`}
       >
         {answer}
@@ -175,9 +215,10 @@ const AnswerButton = ({
 interface AnswerResultProps {
   answer: ChoiceAnswer;
   count: number;
+  showCount: boolean;
 }
 
-const AnswerResult = ({ answer, count }: AnswerResultProps) => {
+const AnswerResult = ({ answer, count, showCount }: AnswerResultProps) => {
   const isPositive = answer === "O";
 
   return (
@@ -189,14 +230,16 @@ const AnswerResult = ({ answer, count }: AnswerResultProps) => {
       >
         {answer}
       </span>
-      <div className="relative flex min-h-20 items-start justify-center">
-        <span className="text-shadow-01 text-5xl font-extrabold text-slate-800">
-          {count}
-        </span>
-        <span className="text-romance-muted ml-2 pt-6 text-xl font-bold">
-          개
-        </span>
-      </div>
+      {showCount && (
+        <div className="relative flex min-h-20 items-start justify-center">
+          <span className="text-shadow-01 text-5xl font-extrabold text-slate-800">
+            {count}
+          </span>
+          <span className="text-romance-muted ml-2 pt-6 text-xl font-bold">
+            개
+          </span>
+        </div>
+      )}
     </div>
   );
 };
