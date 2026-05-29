@@ -147,7 +147,7 @@ export const QuestionDetailClient = ({
               onSubmit={handleSubmit}
               className="mdl:hidden mx-auto flex w-full max-w-[820px] flex-col items-center gap-6"
             >
-              <p className="text-shadow-01 mdl:hidden font-jua text-center text-2xl font-extrabold text-slate-800">
+              <p className="text-shadow-01 mdl:hidden text-center text-2xl font-extrabold text-slate-800">
                 {id}번 질문
               </p>
 

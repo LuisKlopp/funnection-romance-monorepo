@@ -55,6 +55,25 @@ body,
   animation: fadeInUp 1s ease-out;
 }
 
+@keyframes impressionKeywordPop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.84) rotate(-3deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.08) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.impression-keyword-pop {
+  animation: impressionKeywordPop 0.32s ease-out;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
