@@ -95,12 +95,7 @@ export default function CounselPage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              <Link
-                href="/image-page"
-                className="transition hover:text-romance-highlight"
-              >
-                대나무숲
-              </Link>
+              대나무숲
             </h1>
           </div>
 

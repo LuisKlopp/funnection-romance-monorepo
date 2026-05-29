@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import {
   romancePersonalUserQueryKey,
 } from "@/api";
 import { SubmitModal } from "@/components";
+import { ROMANCE_NICKNAME_STORAGE_KEY } from "@/constants/choice-questions";
 import { savePersonalSubmittedUserId } from "@/lib";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -24,6 +25,7 @@ interface PersonalDetailClientProps {
 export const PersonalDetailClient = ({
   generateString,
 }: PersonalDetailClientProps) => {
+  const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const userQuery = useQuery({
@@ -43,6 +45,7 @@ export const PersonalDetailClient = ({
       return createRomancePersonalMessage(user.id, {
         message: trimmedMessage,
         font: DEFAULT_FONT,
+        nickname: getSavedWriterNickname(),
       });
     },
     onSuccess: () => {
@@ -51,6 +54,9 @@ export const PersonalDetailClient = ({
       }
       setMessage("");
       setSubmitMessage("메시지가 전달되었습니다");
+      queryClient.invalidateQueries({
+        queryKey: romancePersonalUserQueryKey(generateString),
+      });
     },
     onError: () => {
       setSubmitMessage("메시지 전송에 실패했습니다");
@@ -156,6 +162,7 @@ export const PersonalDetailClient = ({
                     {messageMutation.isPending ? "전송 중" : "메시지 보내기"}
                   </button>
                 </div>
+
               </form>
             )}
           </div>
@@ -188,6 +195,13 @@ const PersonalUserProfile = ({ user }: { user: RomancePersonalUser }) => {
       </p>
     </div>
   );
+};
+
+const getSavedWriterNickname = () => {
+  const savedNickname =
+    localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
+
+  return savedNickname || undefined;
 };
 
 const getPersonalImageSource = (user: RomancePersonalUser) => {

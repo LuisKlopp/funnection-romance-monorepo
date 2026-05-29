@@ -11,10 +11,11 @@ import {
   FIRST_IMPRESSION_RESULT_QUERY_KEY,
   getFirstImpression,
   getFirstImpressionResults,
+  getRomancePersonalUsers,
+  ROMANCE_PERSONAL_QUERY_KEY,
   sendFirstImpression,
 } from "@/api";
 import { SubmitModal } from "@/components";
-import { impressionNicknames } from "@/constants/impression-nicknames";
 
 export default function ImpressionPage() {
   const [currentKeyword, setCurrentKeyword] = useState("");
@@ -35,6 +36,11 @@ export default function ImpressionPage() {
     queryKey: FIRST_IMPRESSION_RESULT_QUERY_KEY,
     queryFn: getFirstImpressionResults,
     enabled: false,
+  });
+
+  const romanceUsersQuery = useQuery({
+    queryKey: ROMANCE_PERSONAL_QUERY_KEY,
+    queryFn: getRomancePersonalUsers,
   });
 
   const sendMutation = useMutation({
@@ -67,6 +73,14 @@ export default function ImpressionPage() {
     firstImpressionQuery.isLoading || impressions.length === 0;
   const isNicknameDisabled =
     currentKeyword.trim().length === 0 || sendMutation.isPending;
+  const nicknames = useMemo(
+    () =>
+      (romanceUsersQuery.data ?? [])
+        .filter((user) => user.id !== 9)
+        .map((user) => user.nickname.trim())
+        .filter(Boolean),
+    [romanceUsersQuery.data]
+  );
 
   const submittedKeywordSet = useMemo(() => {
     return new Set(drawnKeywords);
@@ -218,12 +232,39 @@ export default function ImpressionPage() {
             <div className="mb-3 flex shrink-0 items-center justify-between px-1">
               <p className="text-romance-ink text-sm font-extrabold">닉네임</p>
               <p className="text-romance-muted text-xs font-semibold">
-                {impressionNicknames.length}명
+                {nicknames.length}명
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pb-1">
-              {impressionNicknames.map((nickname) => {
+              {romanceUsersQuery.isLoading &&
+                Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="shadow-soft-card min-h-[46px] rounded-xl border border-white/70 bg-white/45"
+                    aria-hidden="true"
+                  />
+                ))}
+
+              {romanceUsersQuery.isError && (
+                <button
+                  type="button"
+                  onClick={() => romanceUsersQuery.refetch()}
+                  className="btn-press-in text-romance-accent col-span-2 rounded-xl border border-white/80 bg-white/85 px-4 py-4 text-sm font-extrabold"
+                >
+                  닉네임 다시 불러오기
+                </button>
+              )}
+
+              {!romanceUsersQuery.isLoading &&
+                !romanceUsersQuery.isError &&
+                nicknames.length === 0 && (
+                  <p className="text-romance-muted col-span-2 py-4 text-center text-sm font-semibold">
+                    표시할 닉네임이 없습니다
+                  </p>
+                )}
+
+              {nicknames.map((nickname) => {
                 const isSubmitted = submittedNicknameSet.has(nickname);
                 const isDisabled = isNicknameDisabled || isSubmitted;
 

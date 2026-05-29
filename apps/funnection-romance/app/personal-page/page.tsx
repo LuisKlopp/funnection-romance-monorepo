@@ -62,7 +62,7 @@ export default function PersonalPage() {
               Array.from({ length: 9 }).map((_, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
                   <div
-                    className="shadow-soft-card h-[136px] w-[102px] rounded-lg border border-white/70 bg-white/45 mdl:h-[176px] mdl:w-[132px]"
+                    className="shadow-soft-card mdl:h-[176px] mdl:w-[132px] h-[136px] w-[102px] rounded-lg border border-white/70 bg-white/45"
                     aria-hidden="true"
                   />
                   <div
@@ -120,7 +120,7 @@ const PersonalUserCard = ({
     >
       <span className="relative">
         {isSubmitted && (
-          <span className="absolute inset-0 z-10 flex items-end justify-center rounded-lg bg-slate-900/55 pb-2 text-xs font-extrabold text-white mdl:text-sm">
+          <span className="mdl:text-sm absolute inset-0 z-10 flex items-end justify-center rounded-lg bg-slate-900/55 pb-2 text-xs font-semibold text-white">
             답변완료
           </span>
         )}
@@ -131,10 +131,10 @@ const PersonalUserCard = ({
           width={132}
           height={176}
           decoding="async"
-          className="shadow-soft-card h-[136px] w-[102px] rounded-lg border-2 border-slate-700 bg-white object-contain mdl:h-[176px] mdl:w-[132px] mdl:border-[3px]"
+          className="shadow-soft-card mdl:h-[176px] mdl:w-[132px] mdl:border-[3px] h-[136px] w-[102px] rounded-lg border-2 border-slate-700 bg-white object-contain"
         />
       </span>
-      <span className="max-w-[102px] truncate text-center text-base font-extrabold mdl:max-w-[132px] mdl:text-xl">
+      <span className="mdl:max-w-[132px] mdl:text-xl max-w-[102px] truncate text-center text-base font-extrabold">
         {user.nickname}
       </span>
     </Link>

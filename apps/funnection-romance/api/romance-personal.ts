@@ -12,6 +12,8 @@ export type RomancePersonalUser = {
 export type RomancePersonalMessage = {
   id: number;
   message: string;
+  font: string;
+  nickname: string | null;
 };
 
 export type RomancePersonalUserMessages = {
@@ -21,7 +23,8 @@ export type RomancePersonalUserMessages = {
 
 export type CreateRomancePersonalMessageRequest = {
   message: string;
-  font?: string;
+  font: string;
+  nickname?: string | null;
 };
 
 export const ROMANCE_PERSONAL_QUERY_KEY = [
@@ -56,14 +59,20 @@ export const getRomancePersonalUserMessages = async (
 
 export const createRomancePersonalMessage = async (
   userId: number,
-  { message, font }: CreateRomancePersonalMessageRequest
+  { message, font, nickname }: CreateRomancePersonalMessageRequest
 ) => {
+  const requestBody: CreateRomancePersonalMessageRequest = {
+    message: message.trim(),
+    font,
+  };
+
+  if (nickname?.trim()) {
+    requestBody.nickname = nickname.trim();
+  }
+
   const { data } = await romancePersonalApi.post(
     `/funnection-romance/history-user/${userId}/answers`,
-    {
-      message: message.trim(),
-      font,
-    }
+    requestBody
   );
 
   return data;

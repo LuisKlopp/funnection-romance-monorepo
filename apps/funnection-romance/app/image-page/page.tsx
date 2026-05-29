@@ -68,10 +68,9 @@ export default function ImagePage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              <span className="mdl:hidden">이미지 게임</span>
               <Link
                 href="/personal-page"
-                className="hover:text-romance-highlight mdl:inline hidden transition"
+                className="transition hover:text-romance-highlight"
               >
                 이미지 게임
               </Link>
