@@ -111,6 +111,12 @@ importers:
 
   apps/funnection-romance-counsel:
     dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.77.2
+        version: 5.90.21(react@19.2.3)
+      axios:
+        specifier: ^1.7.2
+        version: 1.13.5
       next:
         specifier: 16.1.6
         version: 16.1.6(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowRight, MessageCircle, PenLine, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  MessageCircle,
+  PenLine,
+  Sparkles,
+  Trees,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -28,6 +34,14 @@ const menuItems = [
     description: "떠오르는 생각을 그대로 표현해주세요.",
     icon: PenLine,
     requiresNickname: true,
+  },
+  {
+    href: "/counsel-page",
+    title: "대나무숲",
+    description: "익명 고민을 하나씩 둘러봐요.",
+    icon: Trees,
+    requiresNickname: false,
+    desktopOnly: true,
   },
 ] as const;
 
@@ -104,7 +118,11 @@ export default function Home() {
               </>
             );
             const className =
-              "btn-press-in bg-romance-surface/85 shadow-soft-card hover:border-romance-line mdl:min-h-[92px] mdl:gap-4 mdl:px-6 group flex min-h-[74px] w-full items-center gap-3 rounded-2xl border border-white/70 px-4 py-3 text-left backdrop-blur transition hover:bg-white";
+              `btn-press-in bg-romance-surface/85 shadow-soft-card hover:border-romance-line mdl:min-h-[92px] mdl:gap-4 mdl:px-6 group min-h-[74px] w-full items-center gap-3 rounded-2xl border border-white/70 px-4 py-3 text-left backdrop-blur transition hover:bg-white ${
+                "desktopOnly" in item && item.desktopOnly
+                  ? "hidden mdl:flex"
+                  : "flex"
+              }`;
 
             return item.requiresNickname ? (
               <button

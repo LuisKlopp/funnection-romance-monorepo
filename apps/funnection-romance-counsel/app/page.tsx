@@ -1,32 +1,53 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useEffect, useState } from "react";
+
+import { createRomanceCounsel, ROMANCE_COUNSEL_QUERY_KEY } from "@/api";
 
 const MAX_COUNSEL_LENGTH = 500;
 
 export default function Home() {
+  const queryClient = useQueryClient();
   const [counsel, setCounsel] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const trimmedCounsel = counsel.trim();
-  const isSubmitDisabled = trimmedCounsel.length === 0;
+
+  const counselMutation = useMutation({
+    mutationFn: createRomanceCounsel,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ROMANCE_COUNSEL_QUERY_KEY,
+      });
+      setCounsel("");
+      setSubmitMessage("제출되었습니다");
+    },
+    onError: () => {
+      setSubmitMessage("제출에 실패했습니다. 다시 시도해주세요");
+    },
+  });
 
   useEffect(() => {
-    if (!isSubmitted) return;
+    if (!submitMessage) return;
 
     const timeoutId = window.setTimeout(() => {
-      setIsSubmitted(false);
+      setSubmitMessage(null);
     }, 1600);
 
     return () => window.clearTimeout(timeoutId);
-  }, [isSubmitted]);
+  }, [submitMessage]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (isSubmitDisabled) return;
+    if (!trimmedCounsel) {
+      setSubmitMessage("고민을 입력해주세요");
+      return;
+    }
 
-    setCounsel("");
-    setIsSubmitted(true);
+    counselMutation.mutate({
+      content: trimmedCounsel,
+    });
   };
 
   return (
@@ -35,12 +56,12 @@ export default function Home() {
         onSubmit={handleSubmit}
         className="mdl:max-w-[640px] mdl:gap-8 mdl:rounded-[32px] mdl:px-12 mdl:py-12 shadow-soft-card bg-romance-surface/70 mx-auto flex min-h-full w-full max-w-[440px] flex-col justify-center gap-7 rounded-[28px] border border-white/70 px-5 py-8 backdrop-blur"
       >
-        <div className="flex flex-col items-center gap-3 text-center">
-          <h1 className="text-romance-accent text-shadow-01 mdl:text-[46px] text-[34px] font-extrabold leading-tight tracking-normal">
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-romance-accent text-shadow-01 mdl:text-[46px] text-[34px] font-extrabold leading-8 tracking-normal">
             Funnection <br className="mdl:hidden" />{" "}
             <span className="text-romance-accent text-[24px]">연애특집</span>
           </h1>
-          <p className="text-romance-muted leading-middlePlus max-w-[320px] text-base font-medium">
+          <p className="text-romance-muted mb-1 mt-2 max-w-[320px] text-base font-medium">
             연애 및 결혼과 관련된 고민을 남겨주세요.
           </p>
           <p className="text-romance-muted text-sm">
@@ -65,17 +86,17 @@ export default function Home() {
 
         <button
           type="submit"
-          disabled={isSubmitDisabled}
+          disabled={counselMutation.isPending}
           className="btn-press-in bg-romance-accent shadow-soft-card flex h-10 w-full items-center justify-center rounded-full border border-white/80 text-base font-extrabold text-white transition hover:brightness-105 disabled:opacity-45"
         >
-          제출
+          {counselMutation.isPending ? "제출 중" : "제출"}
         </button>
       </form>
 
-      {isSubmitted && (
+      {submitMessage && (
         <div className="fixed inset-x-0 bottom-8 z-50 flex justify-center px-5">
           <div className="shadow-soft-card bg-romance-surface/95 text-romance-accent rounded-2xl border border-white/80 px-5 py-4 text-sm font-extrabold backdrop-blur">
-            제출되었습니다
+            {submitMessage}
           </div>
         </div>
       )}
