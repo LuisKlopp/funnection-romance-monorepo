@@ -1,10 +1,17 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
+import {
+  createRomanceQuestionAnswer,
+  getRomanceQuestionAnswers,
+  romanceQuestionAnswersQueryKey,
+} from "@/api";
 import { SubmitModal } from "@/components";
+import { ROMANCE_NICKNAME_STORAGE_KEY } from "@/constants/choice-questions";
 import { QUESTION_ANSWERED_STORAGE_KEY } from "@/constants/question-questions";
 
 interface QuestionDetailClientProps {
@@ -12,42 +19,67 @@ interface QuestionDetailClientProps {
   question: string;
 }
 
-const sampleAnswers = [
-  "새로운 도전과 경험을 하고싶어요",
-  "점점 마음이 단단해지는 중이에요",
-  "맑음. 생각보다 편안한 하루예요",
-  "평온해요. 그냥 조용하고 평범한 하루를 보내요, 평온해요. 그냥 조용하고 평범한 하루를 보내요, 평온해요. 그냥 조용하고 평범한 하루를 보내요",
-  "안정적이지만, 더 큰 안정을 추구하는 상태",
-  "만족합니다",
-  "새로운 시작이 가능한 충전상태",
-  "앞으로의 방향을 정리하는 상태",
-] as const;
-
 export const QuestionDetailClient = ({
   id,
   question,
 }: QuestionDetailClientProps) => {
+  const queryClient = useQueryClient();
   const [answer, setAnswer] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [displayAnswers, setDisplayAnswers] = useState<string[]>([]);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [visibleAnswerCount, setVisibleAnswerCount] = useState(0);
   const [isRevealingAnswers, setIsRevealingAnswers] = useState(false);
   const revealTimeoutIds = useRef<number[]>([]);
 
-  const isSubmitDisabled = answer.trim().length === 0 || isSubmitting;
-  const visibleAnswers = displayAnswers.slice(0, visibleAnswerCount);
-  const answerCount = displayAnswers.length || sampleAnswers.length;
+  const answersQuery = useQuery({
+    queryKey: romanceQuestionAnswersQueryKey(id),
+    queryFn: () => getRomanceQuestionAnswers(id),
+  });
+
+  const answerMutation = useMutation({
+    mutationFn: ({
+      nickname,
+      answer,
+    }: {
+      nickname: string;
+      answer: string;
+    }) => createRomanceQuestionAnswer(id, { nickname, answer }),
+    onSuccess: () => {
+      const savedIds = localStorage.getItem(QUESTION_ANSWERED_STORAGE_KEY);
+      const answeredIds = savedIds ? parseAnsweredIds(savedIds) : [];
+      const nextAnsweredIds = answeredIds.includes(id)
+        ? answeredIds
+        : [...answeredIds, id];
+
+      localStorage.setItem(
+        QUESTION_ANSWERED_STORAGE_KEY,
+        JSON.stringify(nextAnsweredIds)
+      );
+      setAnswer("");
+      setSubmitMessage("답변이 제출되었습니다");
+      queryClient.invalidateQueries({
+        queryKey: romanceQuestionAnswersQueryKey(id),
+      });
+    },
+    onError: () => {
+      setSubmitMessage("답변 제출에 실패했습니다");
+    },
+  });
+
+  const answerItems = answersQuery.data?.answers ?? [];
+  const visibleAnswers = answerItems.slice(0, visibleAnswerCount);
+  const answerCount = answerItems.length;
+  const trimmedAnswer = answer.trim();
+  const isSubmitDisabled = trimmedAnswer.length === 0 || answerMutation.isPending;
 
   useEffect(() => {
-    if (!isSubmitted) return;
+    if (!submitMessage) return;
 
     const timeoutId = window.setTimeout(() => {
-      setIsSubmitted(false);
+      setSubmitMessage(null);
     }, 1500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [isSubmitted]);
+  }, [submitMessage]);
 
   useEffect(() => {
     return () => {
@@ -61,46 +93,44 @@ export const QuestionDetailClient = ({
     event.preventDefault();
     if (isSubmitDisabled) return;
 
-    setIsSubmitting(true);
+    const savedNickname = getSavedNickname();
 
-    window.setTimeout(() => {
-      const savedIds = localStorage.getItem(QUESTION_ANSWERED_STORAGE_KEY);
-      const answeredIds = savedIds ? parseAnsweredIds(savedIds) : [];
-      const nextAnsweredIds = answeredIds.includes(id)
-        ? answeredIds
-        : [...answeredIds, id];
+    if (!savedNickname || !trimmedAnswer) {
+      setSubmitMessage("닉네임과 답변을 입력해주세요");
+      return;
+    }
 
-      localStorage.setItem(
-        QUESTION_ANSWERED_STORAGE_KEY,
-        JSON.stringify(nextAnsweredIds)
-      );
-      setAnswer("");
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 700);
+    answerMutation.mutate({
+      nickname: savedNickname,
+      answer: trimmedAnswer,
+    });
   };
 
-  const handleShowAnswers = () => {
+  const handleShowAnswers = async () => {
     if (isRevealingAnswers || visibleAnswerCount === answerCount) {
       return;
     }
 
-    const shuffledAnswers = shuffleAnswers(sampleAnswers);
+    const result = await answersQuery.refetch();
+    const nextAnswers = result.data?.answers ?? [];
+
+    if (nextAnswers.length === 0) {
+      return;
+    }
 
     revealTimeoutIds.current.forEach((timeoutId) => {
       window.clearTimeout(timeoutId);
     });
     revealTimeoutIds.current = [];
-    setDisplayAnswers(shuffledAnswers);
     setVisibleAnswerCount(0);
     setIsRevealingAnswers(true);
 
-    shuffledAnswers.forEach((_, index) => {
+    nextAnswers.forEach((_, index) => {
       const timeoutId = window.setTimeout(
         () => {
           setVisibleAnswerCount(index + 1);
 
-          if (index === shuffledAnswers.length - 1) {
+          if (index === nextAnswers.length - 1) {
             setIsRevealingAnswers(false);
           }
         },
@@ -155,7 +185,7 @@ export const QuestionDetailClient = ({
                 value={answer}
                 onChange={(event) => setAnswer(event.target.value)}
                 placeholder="답변을 입력해주세요"
-                disabled={isSubmitting}
+                disabled={answerMutation.isPending}
                 className="shadow-soft-card text-romance-ink placeholder:text-romance-muted/55 focus:border-romance-accent focus:ring-romance-accent/20 mdl:min-h-[220px] mdl:max-w-[680px] mdl:text-xl min-h-[210px] w-full resize-none rounded-[24px] border border-white/85 bg-white/90 px-5 py-5 text-base font-semibold leading-relaxed outline-none backdrop-blur transition focus:bg-white focus:ring-4 disabled:opacity-70"
                 aria-label={`${id}번 질문 답변 입력`}
               />
@@ -167,10 +197,20 @@ export const QuestionDetailClient = ({
               >
                 제출
               </button>
+
+              {answersQuery.isError && (
+                <button
+                  type="button"
+                  onClick={() => answersQuery.refetch()}
+                  className="btn-press-in text-romance-accent rounded-xl border border-white/80 bg-white/85 px-4 py-3 text-sm font-extrabold"
+                >
+                  답변 다시 불러오기
+                </button>
+              )}
             </form>
 
             <div className="mdl:flex relative mx-auto hidden h-full w-full max-w-[820px] flex-col items-center justify-center gap-8">
-              <p className="font-jua leading-tightPlus text-center text-[36px] font-extrabold text-slate-700">
+              <p className="font-jua leading-tightPlus text-center text-[36px] font-medium text-slate-700">
                 {id}. {question}
               </p>
 
@@ -178,10 +218,10 @@ export const QuestionDetailClient = ({
                 <div className="flex w-full max-w-[680px] flex-col gap-3">
                   {visibleAnswers.map((item, index) => (
                     <div
-                      key={item}
-                      className="answer-scrollbar fade-in-up font-jua text-romance-accent max-h-[64px] overflow-y-auto rounded-lg bg-[#fff1f6]/95 px-5 py-3 pr-7 text-[24px] font-extrabold leading-tight shadow-[0_10px_22px_rgba(139,34,72,0.14)]"
+                      key={item.id}
+                      className="answer-scrollbar fade-in-up font-jua text-romance-accent max-h-[64px] overflow-y-auto rounded-lg bg-[#fff1f6]/95 px-5 py-3 pr-7 text-[24px] font-medium leading-tight shadow-[0_10px_22px_rgba(139,34,72,0.14)]"
                     >
-                      {index + 1}. {item}
+                      {index + 1}: {item.answer}
                     </div>
                   ))}
                 </div>
@@ -191,11 +231,13 @@ export const QuestionDetailClient = ({
                 type="button"
                 onClick={handleShowAnswers}
                 disabled={
-                  isRevealingAnswers || visibleAnswerCount === answerCount
+                  answersQuery.isFetching ||
+                  isRevealingAnswers ||
+                  (answerCount > 0 && visibleAnswerCount === answerCount)
                 }
                 className="btn-press-in mt-4 flex h-[58px] min-w-[190px] items-center justify-center rounded-xl bg-slate-600 px-7 text-lg font-extrabold text-white shadow-[0_10px_22px_rgba(61,76,101,0.24)] transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                답변 확인
+                {answersQuery.isFetching ? "답변 확인" : "답변 확인"}
               </button>
 
               <p className="absolute bottom-0 right-0 text-base font-extrabold text-slate-700">
@@ -206,11 +248,14 @@ export const QuestionDetailClient = ({
         </div>
       </section>
 
-      {isSubmitting && <SubmittingOverlay />}
-      {isSubmitted && <SubmitModal contents="답변이 제출되었습니다" />}
+      {answerMutation.isPending && <SubmittingOverlay />}
+      {submitMessage && <SubmitModal contents={submitMessage} />}
     </main>
   );
 };
+
+const getSavedNickname = () =>
+  localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
 
 const parseAnsweredIds = (value: string): number[] => {
   try {
@@ -220,20 +265,6 @@ const parseAnsweredIds = (value: string): number[] => {
   } catch {
     return [];
   }
-};
-
-const shuffleAnswers = (answers: readonly string[]) => {
-  const shuffledAnswers = [...answers];
-
-  for (let index = shuffledAnswers.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [shuffledAnswers[index], shuffledAnswers[randomIndex]] = [
-      shuffledAnswers[randomIndex],
-      shuffledAnswers[index],
-    ];
-  }
-
-  return shuffledAnswers;
 };
 
 const SubmittingOverlay = () => {

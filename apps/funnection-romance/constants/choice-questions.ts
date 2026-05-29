@@ -52,3 +52,4 @@ export const oxQuestions = [
 ] as const;
 
 export const CHOICE_ANSWERED_STORAGE_KEY = "funnection-romance-choice-answered";
+export const ROMANCE_NICKNAME_STORAGE_KEY = "funnection-romance-nickname";

@@ -1,13 +1,16 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Home, Sparkles } from "lucide-react";
+import { Home, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import type { FirstImpressionResultItem } from "@/api";
 import {
   FIRST_IMPRESSION_QUERY_KEY,
+  FIRST_IMPRESSION_RESULT_QUERY_KEY,
   getFirstImpression,
+  getFirstImpressionResults,
   sendFirstImpression,
 } from "@/api";
 import { SubmitModal } from "@/components";
@@ -19,10 +22,19 @@ export default function ImpressionPage() {
   const [submittedNicknames, setSubmittedNicknames] = useState<string[]>([]);
   const [drawCount, setDrawCount] = useState(0);
   const [submittedMessage, setSubmittedMessage] = useState("");
+  const [selectedResult, setSelectedResult] =
+    useState<FirstImpressionResultItem | null>(null);
+  const [isNicknameVisible, setIsNicknameVisible] = useState(false);
 
   const firstImpressionQuery = useQuery({
     queryKey: FIRST_IMPRESSION_QUERY_KEY,
     queryFn: getFirstImpression,
+  });
+
+  const firstImpressionResultQuery = useQuery({
+    queryKey: FIRST_IMPRESSION_RESULT_QUERY_KEY,
+    queryFn: getFirstImpressionResults,
+    enabled: false,
   });
 
   const sendMutation = useMutation({
@@ -62,6 +74,7 @@ export default function ImpressionPage() {
   const submittedNicknameSet = useMemo(() => {
     return new Set(submittedNicknames);
   }, [submittedNicknames]);
+  const results = firstImpressionResultQuery.data?.results ?? [];
 
   useEffect(() => {
     if (!submittedMessage) return;
@@ -113,6 +126,22 @@ export default function ImpressionPage() {
       nickname: trimmedNickname,
       impression: trimmedKeyword,
     });
+  };
+
+  const handleShowResults = () => {
+    setSelectedResult(null);
+    setIsNicknameVisible(false);
+    firstImpressionResultQuery.refetch();
+  };
+
+  const handleOpenResult = (result: FirstImpressionResultItem) => {
+    setSelectedResult(result);
+    setIsNicknameVisible(false);
+  };
+
+  const handleCloseResult = () => {
+    setSelectedResult(null);
+    setIsNicknameVisible(false);
   };
 
   return (
@@ -233,17 +262,143 @@ export default function ImpressionPage() {
         </div>
       </section>
 
-      <section className="mdl:flex hidden h-full w-full flex-col items-center justify-center gap-6 px-8">
-        <h1 className="text-romance-accent text-shadow-01 text-[42px] font-extrabold leading-none">
-          Funnection 첫인상 키워드
-        </h1>
-        <button
-          type="button"
-          className="btn-press-in bg-romance-surface/90 text-romance-accent shadow-soft-card min-w-[160px] rounded-xl border border-white/80 px-6 py-3 text-lg font-extrabold backdrop-blur hover:bg-white"
+      <section className="mdl:flex hidden h-full w-full overflow-y-auto px-8 py-10">
+        <Link
+          href="/"
+          className="btn-press-in bg-romance-surface/85 text-romance-accent shadow-soft-card absolute left-8 top-8 flex h-12 w-12 items-center justify-center rounded-full border border-white/80 backdrop-blur"
+          aria-label="홈으로 이동"
         >
-          첫인상 확인
-        </button>
+          <Home className="h-5 w-5" />
+        </Link>
+
+        <div className="mx-auto flex min-h-full w-full max-w-[960px] flex-col items-center justify-center gap-6">
+          <h1 className="text-romance-accent text-shadow-01 text-center text-[42px] font-extrabold leading-none">
+            Funnection 첫인상 키워드
+          </h1>
+
+          {firstImpressionResultQuery.isFetching && (
+            <div className="bg-romance-surface/80 shadow-soft-card mt-2 flex min-h-[132px] w-full max-w-[520px] flex-col items-center justify-center gap-4 rounded-2xl border border-white/80 px-6 py-6 text-center backdrop-blur">
+              <div className="border-romance-accent h-9 w-9 animate-spin rounded-full border-4 border-t-transparent" />
+              <p className="text-romance-accent text-sm font-extrabold">
+                첫인상 결과를 만들고 있습니다
+              </p>
+            </div>
+          )}
+
+          {firstImpressionResultQuery.isError &&
+            !firstImpressionResultQuery.isFetching && (
+              <div className="bg-romance-surface/80 shadow-soft-card mt-2 flex min-h-[116px] w-full max-w-[520px] flex-col items-center justify-center gap-3 rounded-2xl border border-white/80 px-6 py-5 text-center backdrop-blur">
+                <p className="text-romance-highlight text-sm font-extrabold">
+                  첫인상 결과를 불러오지 못했습니다
+                </p>
+                <button
+                  type="button"
+                  onClick={handleShowResults}
+                  className="btn-press-in bg-romance-accent rounded-full px-5 py-2 text-sm font-extrabold text-white"
+                >
+                  다시 확인
+                </button>
+              </div>
+            )}
+
+          {firstImpressionResultQuery.isSuccess &&
+            !firstImpressionResultQuery.isFetching && (
+              <div className="my-8 w-full">
+                {results.length > 0 ? (
+                  <div className="slow-fade-in-up grid w-full grid-cols-8 justify-items-center gap-1">
+                    {results.map((result) => (
+                      <button
+                        key={`${result.index}-${result.nickname}`}
+                        type="button"
+                        onClick={() => handleOpenResult(result)}
+                        className="btn-press-in bg-romance-accent shadow-soft-card flex h-16 w-24 items-center justify-center rounded-xl border border-white/70 px-3 text-lg font-extrabold text-white transition hover:brightness-105"
+                        aria-label={`${result.index}번 첫인상 결과 보기`}
+                      >
+                        {result.index}번
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-romance-muted bg-romance-surface/75 shadow-soft-card rounded-2xl border border-white/80 px-6 py-5 text-center text-sm font-semibold">
+                    표시할 첫인상 결과가 없습니다
+                  </p>
+                )}
+              </div>
+            )}
+
+          <button
+            type="button"
+            onClick={handleShowResults}
+            disabled={firstImpressionResultQuery.isFetching}
+            className="btn-press-in bg-romance-surface/90 text-romance-accent shadow-soft-card min-w-[160px] rounded-xl border border-white/80 px-6 py-3 text-lg font-extrabold backdrop-blur hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            첫인상 확인
+          </button>
+        </div>
       </section>
+
+      {selectedResult && (
+        <div
+          className="mdl:flex absolute inset-0 z-50 hidden items-center justify-center bg-black/35 px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedResult.index}번 첫인상 결과`}
+        >
+          <div className="slow-fade-in-up bg-romance-surface shadow-soft-card relative flex max-h-[82dvh] w-full max-w-[560px] flex-col overflow-y-auto rounded-2xl border border-white/80 px-6 py-6 backdrop-blur">
+            <button
+              type="button"
+              onClick={handleCloseResult}
+              className="btn-press-in text-romance-muted hover:text-romance-accent absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/70"
+              aria-label="첫인상 결과 닫기"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <p className="text-romance-highlight text-sm font-extrabold">
+              {selectedResult.index}번 첫인상 결과
+            </p>
+            <h2 className="text-romance-accent mt-3 pr-12 text-3xl font-extrabold leading-tight">
+              {selectedResult.job}
+            </h2>
+            <p className="leading-middlePlus text-romance-ink mt-4 text-lg font-semibold">
+              {selectedResult.sentence}
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {selectedResult.impressions.map((impression) => (
+                <span
+                  key={impression}
+                  className="bg-romance-tint text-romance-accent rounded-full px-3 py-1.5 text-base font-extrabold"
+                >
+                  {impression}
+                </span>
+              ))}
+            </div>
+
+            <div className="border-romance-line/45 mt-6 flex min-h-[46px] items-center justify-between gap-3 border-t pt-5">
+              {isNicknameVisible ? (
+                <p className="text-romance-ink text-xl font-extrabold">
+                  {selectedResult.nickname}
+                </p>
+              ) : (
+                <p className="text-romance-muted text-sm font-semibold">
+                  닉네임은 버튼을 누른 뒤 공개됩니다
+                </p>
+              )}
+
+              {!isNicknameVisible && (
+                <button
+                  type="button"
+                  onClick={() => setIsNicknameVisible(true)}
+                  className="btn-press-in bg-romance-accent shrink-0 rounded-full px-5 py-2.5 text-sm font-extrabold text-white"
+                >
+                  닉네임 보기
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {submittedMessage && (
         <SubmitModal

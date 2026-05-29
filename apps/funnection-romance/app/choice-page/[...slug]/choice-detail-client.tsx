@@ -1,13 +1,23 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import type { RomanceChoiceAnswerValue } from "@/api";
+import {
+  getRomanceChoiceResult,
+  getRomanceChoiceTotal,
+  romanceChoiceResultQueryKey,
+  romanceChoiceTotalQueryKey,
+  saveRomanceChoiceAnswer,
+} from "@/api";
 import { SubmitModal } from "@/components";
-import { CHOICE_ANSWERED_STORAGE_KEY } from "@/constants/choice-questions";
-
-type ChoiceAnswer = "O" | "X";
+import {
+  CHOICE_ANSWERED_STORAGE_KEY,
+  ROMANCE_NICKNAME_STORAGE_KEY,
+} from "@/constants/choice-questions";
 
 interface ChoiceDetailClientProps {
   id: number;
@@ -16,51 +26,98 @@ interface ChoiceDetailClientProps {
 
 export const ChoiceDetailClient = ({
   id,
-  question,
+  question: initialQuestion,
 }: ChoiceDetailClientProps) => {
-  const [selectedAnswer, setSelectedAnswer] = useState<ChoiceAnswer | null>(
-    null
-  );
-  const [counts, setCounts] = useState<Record<ChoiceAnswer, number>>({
-    O: 0,
-    X: 0,
-  });
+  const queryClient = useQueryClient();
+  const [selectedAnswer, setSelectedAnswer] =
+    useState<RomanceChoiceAnswerValue | null>(null);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [submittedAnswer, setSubmittedAnswer] = useState<ChoiceAnswer | null>(
-    null
-  );
+  const [hasCheckedTotal, setHasCheckedTotal] = useState(false);
 
-  const totalCount = counts.O + counts.X;
+  const resultQuery = useQuery({
+    queryKey: romanceChoiceResultQueryKey(id),
+    queryFn: () => getRomanceChoiceResult(id),
+    enabled: false,
+  });
+
+  const totalQuery = useQuery({
+    queryKey: romanceChoiceTotalQueryKey(id),
+    queryFn: () => getRomanceChoiceTotal(id),
+    enabled: false,
+  });
+
+  const answerMutation = useMutation({
+    mutationFn: ({
+      answer,
+      nickname,
+    }: {
+      answer: RomanceChoiceAnswerValue;
+      nickname: string;
+    }) => saveRomanceChoiceAnswer(id, { nickname, answer }),
+    onSuccess: (savedAnswer) => {
+      const savedIds = localStorage.getItem(CHOICE_ANSWERED_STORAGE_KEY);
+      const answeredIds = savedIds ? parseAnsweredIds(savedIds) : [];
+      const nextAnsweredIds = answeredIds.includes(id)
+        ? answeredIds
+        : [...answeredIds, id];
+
+      localStorage.setItem(
+        CHOICE_ANSWERED_STORAGE_KEY,
+        JSON.stringify(nextAnsweredIds)
+      );
+      setSelectedAnswer(savedAnswer.answer);
+      setSubmitMessage(`${savedAnswer.answer}로 제출됐습니다`);
+      queryClient.invalidateQueries({
+        queryKey: romanceChoiceResultQueryKey(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: romanceChoiceTotalQueryKey(id),
+      });
+    },
+    onError: () => {
+      setSubmitMessage(null);
+    },
+  });
+
+  const result = resultQuery.data ?? { questionId: id, O: 0, X: 0 };
+  const totalCount = totalQuery.data?.total ?? 0;
+  const isAnswerDisabled = answerMutation.isPending || !!selectedAnswer;
 
   useEffect(() => {
-    if (!submittedAnswer) return;
+    if (!submitMessage) return;
 
     const timeoutId = window.setTimeout(() => {
-      setSubmittedAnswer(null);
+      setSubmitMessage(null);
     }, 1500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [submittedAnswer]);
+  }, [submitMessage]);
 
-  const handleAnswerClick = (answer: ChoiceAnswer) => {
-    if (selectedAnswer) return;
+  const handleAnswerClick = (answer: RomanceChoiceAnswerValue) => {
+    if (isAnswerDisabled) return;
 
-    const savedIds = localStorage.getItem(CHOICE_ANSWERED_STORAGE_KEY);
-    const answeredIds = savedIds ? parseAnsweredIds(savedIds) : [];
-    const nextAnsweredIds = answeredIds.includes(id)
-      ? answeredIds
-      : [...answeredIds, id];
+    const savedNickname = getSavedNickname();
 
-    localStorage.setItem(
-      CHOICE_ANSWERED_STORAGE_KEY,
-      JSON.stringify(nextAnsweredIds)
-    );
-    setSelectedAnswer(answer);
-    setCounts((prev) => ({
-      ...prev,
-      [answer]: prev[answer] + 1,
-    }));
-    setSubmittedAnswer(answer);
+    if (!savedNickname) {
+      setSubmitMessage("닉네임을 먼저 입력해주세요");
+      return;
+    }
+
+    answerMutation.mutate({ answer, nickname: savedNickname });
+  };
+
+  const handleShowResults = async () => {
+    const result = await resultQuery.refetch();
+
+    if (result.data) {
+      setShowResults(true);
+    }
+  };
+
+  const handleCheckTotal = () => {
+    setHasCheckedTotal(true);
+    totalQuery.refetch();
   };
 
   return (
@@ -96,8 +153,8 @@ export const ChoiceDetailClient = ({
 
         <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-10 mt-4 flex min-h-0 flex-1 flex-col justify-center rounded-[28px] border border-white/70 p-4 backdrop-blur">
           <div className="mdl:gap-12 mx-auto flex w-full max-w-[820px] flex-col items-center gap-6">
-            <p className="text-romance-ink font-jua leading-tightPlus mdl:block mdl:text-4xl hidden break-keep text-center text-xl font-extrabold text-slate-800">
-              {id}. {question}
+            <p className="text-romance-ink font-jua leading-tightPlus mdl:block mdl:text-4xl hidden break-keep text-center text-xl font-medium text-slate-800">
+              {id}. {initialQuestion}
             </p>
 
             <p className="text-shadow-01 mdl:hidden text-center text-2xl font-extrabold text-slate-800">
@@ -107,57 +164,63 @@ export const ChoiceDetailClient = ({
             <div className="mdl:hidden grid w-full grid-cols-1 gap-4">
               <AnswerButton
                 answer="O"
-                selectedAnswer={selectedAnswer}
+                disabled={isAnswerDisabled}
                 onClick={() => handleAnswerClick("O")}
               />
               <AnswerButton
                 answer="X"
-                selectedAnswer={selectedAnswer}
+                disabled={isAnswerDisabled}
                 onClick={() => handleAnswerClick("X")}
               />
             </div>
 
             <div className="mdl:flex hidden w-full flex-col items-center gap-10">
-              <div className="flex w-full items-start justify-center gap-32">
+              <div className="mx-auto flex w-full max-w-[560px] items-start justify-center gap-24">
                 <AnswerResult
                   answer="O"
-                  count={counts.O}
+                  count={result.O}
                   showCount={showResults}
                 />
                 <AnswerResult
                   answer="X"
-                  count={counts.X}
+                  count={result.X}
                   showCount={showResults}
                 />
               </div>
 
-              <p className="text-romance-muted/75 text-sm font-semibold">
-                현재 {totalCount}명이 답변했어요
-              </p>
-
               {!showResults && (
                 <button
                   type="button"
-                  onClick={() => setShowResults(true)}
+                  onClick={handleShowResults}
                   className="btn-press-in bg-romance-surface/90 text-romance-accent shadow-soft-card min-w-[150px] rounded-xl border border-white/80 px-6 py-4 text-xl font-extrabold backdrop-blur hover:bg-white"
                 >
                   결과 확인
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={handleCheckTotal}
+                className="btn-press-in text-romance-muted/75 text-sm font-semibold hover:text-romance-accent"
+              >
+                {hasCheckedTotal
+                  ? `현재 ${totalCount}명이 답변했어요`
+                  : "현재 0명이 답변했어요"}
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {submittedAnswer && (
-        <SubmitModal
-          contents={`${submittedAnswer}로 제출됐습니다`}
-          overlayClassName="mdl:hidden"
-        />
+      {submitMessage && (
+        <SubmitModal contents={submitMessage} overlayClassName="mdl:hidden" />
       )}
     </main>
   );
 };
+
+const getSavedNickname = () =>
+  localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
 
 const parseAnsweredIds = (value: string): number[] => {
   try {
@@ -170,36 +233,35 @@ const parseAnsweredIds = (value: string): number[] => {
 };
 
 interface AnswerButtonProps {
-  answer: ChoiceAnswer;
-  selectedAnswer: ChoiceAnswer | null;
+  answer: RomanceChoiceAnswerValue;
+  disabled: boolean;
   onClick: () => void;
 }
 
 const AnswerButton = ({
   answer,
-  selectedAnswer,
+  disabled,
   onClick,
 }: AnswerButtonProps) => {
-  const isAnswered = !!selectedAnswer;
   const isPositive = answer === "O";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={isAnswered}
-      className={`btn-press-in shadow-soft-card min-h-17.5 flex flex-col items-center justify-center rounded-[20px] border px-6 py-3 transition ${
-        isAnswered
-          ? "border-romance-accent/25 bg-romance-accent/85 text-white opacity-70"
+      disabled={disabled}
+      className={`btn-press-in shadow-soft-card min-h-17.5 flex flex-col items-center justify-center rounded-[20px] border px-6 py-3 transition disabled:cursor-not-allowed ${
+        disabled
+          ? "border-romance-accent/25 bg-romance-accent text-white"
           : isPositive
             ? "border-[#bfdbfe] bg-white/90 text-[#2563eb] hover:bg-[#eff6ff]"
             : "border-[#fecaca] bg-white/90 text-[#dc2626] hover:bg-[#fef2f2]"
       }`}
-      aria-label={isAnswered ? "답변 완료" : `${answer} 선택`}
+      aria-label={`${answer} 선택`}
     >
       <span
         className={`text-[36px] font-extrabold leading-none ${
-          isAnswered
+          disabled
             ? "text-shadow-01"
             : isPositive
               ? "text-shadow-01"
@@ -213,29 +275,33 @@ const AnswerButton = ({
 };
 
 interface AnswerResultProps {
-  answer: ChoiceAnswer;
+  answer: RomanceChoiceAnswerValue;
   count: number;
   showCount: boolean;
 }
 
-const AnswerResult = ({ answer, count, showCount }: AnswerResultProps) => {
+const AnswerResult = ({
+  answer,
+  count,
+  showCount,
+}: AnswerResultProps) => {
   const isPositive = answer === "O";
 
   return (
-    <div className="flex min-w-[180px] flex-col items-center gap-12">
+    <div className="mdl:min-h-[180px] mdl:min-w-[180px] mdl:gap-7 flex min-w-[120px] flex-col items-center justify-start gap-4">
       <span
-        className={`text-shadow-04 text-[132px] font-extrabold leading-none ${
+        className={`text-shadow-04 mdl:text-[112px] text-[64px] font-extrabold leading-none ${
           isPositive ? "text-[#2563eb]" : "text-[#dc2626]"
         }`}
       >
         {answer}
       </span>
       {showCount && (
-        <div className="relative flex min-h-20 items-start justify-center">
-          <span className="text-shadow-01 text-5xl font-extrabold text-slate-800">
+        <div className="relative flex min-h-10 items-start justify-center">
+          <span className="text-shadow-01 mdl:text-[40px] text-[28px] font-semibold text-slate-800">
             {count}
           </span>
-          <span className="text-romance-muted ml-2 pt-6 text-xl font-bold">
+          <span className="text-romance-muted ml-1 pt-3 text-sm font-bold">
             개
           </span>
         </div>

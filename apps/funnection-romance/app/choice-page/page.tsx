@@ -1,20 +1,37 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Home, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import {
-  CHOICE_ANSWERED_STORAGE_KEY,
-  oxQuestions,
-} from "@/constants/choice-questions";
+import { getRomanceChoices, ROMANCE_CHOICE_QUERY_KEY } from "@/api";
+import { CHOICE_ANSWERED_STORAGE_KEY } from "@/constants/choice-questions";
 
 export default function ChoicePage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const choicesQuery = useQuery({
+    queryKey: ROMANCE_CHOICE_QUERY_KEY,
+    queryFn: getRomanceChoices,
+  });
+
+  const choices = choicesQuery.data ?? [];
 
   const resetAnsweredChoices = () => {
     localStorage.removeItem(CHOICE_ANSWERED_STORAGE_KEY);
     setSelectedIds([]);
+  };
+
+  const markChoiceAsClicked = (choiceId: number) => {
+    const nextSelectedIds = selectedIds.includes(choiceId)
+      ? selectedIds
+      : [...selectedIds, choiceId];
+
+    setSelectedIds(nextSelectedIds);
+    localStorage.setItem(
+      CHOICE_ANSWERED_STORAGE_KEY,
+      JSON.stringify(nextSelectedIds)
+    );
   };
 
   useEffect(() => {
@@ -43,7 +60,13 @@ export default function ChoicePage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              OX 질문
+              <span className="mdl:hidden">OX 질문</span>
+              <Link
+                href="/chemistry-page"
+                className="hover:text-romance-highlight mdl:inline hidden transition"
+              >
+                OX 질문
+              </Link>
             </h1>
           </div>
 
@@ -60,32 +83,56 @@ export default function ChoicePage() {
         <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-6 mt-4 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/70 p-3 backdrop-blur">
           <div className="mdl:mb-5 mb-3 flex shrink-0 items-center justify-between gap-2 px-1">
             <p className="text-romance-muted mdl:text-base text-sm font-bold">
-              {selectedIds.length} / {oxQuestions.length}
-            </p>
-            <p className="text-romance-muted mdl:text-sm text-xs font-semibold">
-              번호를 눌러 답변한 질문을 표시해요
+              {selectedIds.length} / {choices.length}
             </p>
           </div>
 
           <div className="no-scrollbar mdl:grid-cols-7 mdl:gap-x-5 mdl:gap-y-6 mdl:p-2 grid min-h-0 flex-1 grid-cols-3 content-start gap-x-4 gap-y-6 overflow-y-auto p-2">
-            {oxQuestions.map((question, index) => {
-              const id = index + 1;
-              const isSelected = selectedIds.includes(id);
+            {choicesQuery.isLoading &&
+              Array.from({ length: 21 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] h-[96px] rounded-2xl border border-white/70 bg-white/45"
+                  aria-hidden="true"
+                />
+              ))}
+
+            {choicesQuery.isError && (
+              <button
+                type="button"
+                onClick={() => choicesQuery.refetch()}
+                className="btn-press-in text-romance-accent col-span-3 rounded-2xl border border-white/80 bg-white/85 px-4 py-5 text-sm font-extrabold"
+              >
+                OX 질문 다시 불러오기
+              </button>
+            )}
+
+            {!choicesQuery.isLoading &&
+              !choicesQuery.isError &&
+              choices.length === 0 && (
+                <p className="text-romance-muted col-span-3 py-8 text-center text-sm font-semibold">
+                  표시할 OX 질문이 없습니다
+                </p>
+              )}
+
+            {choices.map((choice) => {
+              const isSelected = selectedIds.includes(choice.id);
 
               return (
                 <Link
-                  key={question}
-                  href={`/choice-page/${id}`}
+                  key={choice.id}
+                  href={`/choice-page/${choice.id}`}
+                  onClick={() => markChoiceAsClicked(choice.id)}
                   className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center overflow-hidden rounded-2xl border text-2xl font-extrabold transition ${
                     isSelected
                       ? "border-romance-highlight bg-romance-accent text-white"
                       : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
-                  aria-label={`${id}번 OX 질문: ${question}`}
-                  title={question}
+                  aria-label={`${choice.id}번 OX 질문: ${choice.question}`}
+                  title={choice.question}
                 >
                   <span className="mdl:left-3 mdl:top-3 mdl:h-2.5 mdl:w-2.5 absolute left-2 top-2 h-2 w-2 rounded-full bg-current opacity-35" />
-                  <span>{id}</span>
+                  <span>{choice.id}</span>
                 </Link>
               );
             })}
