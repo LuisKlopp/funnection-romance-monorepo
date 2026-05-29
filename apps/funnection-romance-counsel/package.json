@@ -1,5 +1,5 @@
 {
-  "name": "funnection-romance",
+  "name": "funnection-romance-counsel",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.77.2",
-    "axios": "^1.7.2",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.483.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^2.3.0",
-    "tailwindcss-animate": "^1.0.7",
-    "zustand": "^5.0.8"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
