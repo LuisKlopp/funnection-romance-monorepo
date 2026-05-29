@@ -12,7 +12,6 @@ import {
 } from "@/api";
 import { SubmitModal } from "@/components";
 import { ROMANCE_NICKNAME_STORAGE_KEY } from "@/constants/choice-questions";
-import { QUESTION_ANSWERED_STORAGE_KEY } from "@/constants/question-questions";
 
 interface QuestionDetailClientProps {
   id: number;
@@ -36,24 +35,9 @@ export const QuestionDetailClient = ({
   });
 
   const answerMutation = useMutation({
-    mutationFn: ({
-      nickname,
-      answer,
-    }: {
-      nickname: string;
-      answer: string;
-    }) => createRomanceQuestionAnswer(id, { nickname, answer }),
+    mutationFn: ({ nickname, answer }: { nickname: string; answer: string }) =>
+      createRomanceQuestionAnswer(id, { nickname, answer }),
     onSuccess: () => {
-      const savedIds = localStorage.getItem(QUESTION_ANSWERED_STORAGE_KEY);
-      const answeredIds = savedIds ? parseAnsweredIds(savedIds) : [];
-      const nextAnsweredIds = answeredIds.includes(id)
-        ? answeredIds
-        : [...answeredIds, id];
-
-      localStorage.setItem(
-        QUESTION_ANSWERED_STORAGE_KEY,
-        JSON.stringify(nextAnsweredIds)
-      );
       setAnswer("");
       setSubmitMessage("답변이 제출되었습니다");
       queryClient.invalidateQueries({
@@ -69,7 +53,8 @@ export const QuestionDetailClient = ({
   const visibleAnswers = answerItems.slice(0, visibleAnswerCount);
   const answerCount = answerItems.length;
   const trimmedAnswer = answer.trim();
-  const isSubmitDisabled = trimmedAnswer.length === 0 || answerMutation.isPending;
+  const isSubmitDisabled =
+    trimmedAnswer.length === 0 || answerMutation.isPending;
 
   useEffect(() => {
     if (!submitMessage) return;
@@ -221,7 +206,8 @@ export const QuestionDetailClient = ({
                       key={item.id}
                       className="answer-scrollbar fade-in-up font-jua text-romance-accent max-h-[64px] overflow-y-auto rounded-lg bg-[#fff1f6]/95 px-5 py-3 pr-7 text-[24px] font-medium leading-tight shadow-[0_10px_22px_rgba(139,34,72,0.14)]"
                     >
-                      {index + 1}: {item.answer}
+                      <span className="text-romance-muted">{index + 1}번:</span>{" "}
+                      {item.answer}
                     </div>
                   ))}
                 </div>
@@ -256,16 +242,6 @@ export const QuestionDetailClient = ({
 
 const getSavedNickname = () =>
   localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
-
-const parseAnsweredIds = (value: string): number[] => {
-  try {
-    const parsedValue = JSON.parse(value);
-
-    return Array.isArray(parsedValue) ? parsedValue : [];
-  } catch {
-    return [];
-  }
-};
 
 const SubmittingOverlay = () => {
   return (

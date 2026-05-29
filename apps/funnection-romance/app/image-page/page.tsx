@@ -5,20 +5,23 @@ import { Home, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { getRomanceQuestions, ROMANCE_QUESTION_QUERY_KEY } from "@/api";
-import { QUESTION_ANSWERED_STORAGE_KEY } from "@/constants/question-questions";
+import {
+  getRomanceImageGameQuestions,
+  ROMANCE_IMAGE_GAME_QUERY_KEY,
+} from "@/api";
+import { IMAGE_GAME_CLICKED_STORAGE_KEY } from "@/constants/image-game";
 
-export default function QuestionPage() {
+export default function ImagePage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const questionsQuery = useQuery({
-    queryKey: ROMANCE_QUESTION_QUERY_KEY,
-    queryFn: getRomanceQuestions,
+  const imageGameQuery = useQuery({
+    queryKey: ROMANCE_IMAGE_GAME_QUERY_KEY,
+    queryFn: getRomanceImageGameQuestions,
   });
 
-  const questions = questionsQuery.data ?? [];
+  const questions = imageGameQuery.data ?? [];
 
   const resetClickedQuestions = () => {
-    localStorage.removeItem(QUESTION_ANSWERED_STORAGE_KEY);
+    localStorage.removeItem(IMAGE_GAME_CLICKED_STORAGE_KEY);
     setSelectedIds([]);
   };
 
@@ -31,7 +34,7 @@ export default function QuestionPage() {
       const nextSelectedIds = [...prevSelectedIds, questionId];
 
       localStorage.setItem(
-        QUESTION_ANSWERED_STORAGE_KEY,
+        IMAGE_GAME_CLICKED_STORAGE_KEY,
         JSON.stringify(nextSelectedIds)
       );
 
@@ -40,7 +43,7 @@ export default function QuestionPage() {
   };
 
   useEffect(() => {
-    const savedIds = localStorage.getItem(QUESTION_ANSWERED_STORAGE_KEY);
+    const savedIds = localStorage.getItem(IMAGE_GAME_CLICKED_STORAGE_KEY);
     if (!savedIds) return;
 
     try {
@@ -50,7 +53,7 @@ export default function QuestionPage() {
         setSelectedIds(parsedIds);
       }
     } catch {
-      localStorage.removeItem(QUESTION_ANSWERED_STORAGE_KEY);
+      localStorage.removeItem(IMAGE_GAME_CLICKED_STORAGE_KEY);
     }
   }, []);
 
@@ -65,7 +68,13 @@ export default function QuestionPage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              문답 질문
+              <span className="mdl:hidden">이미지 게임</span>
+              <Link
+                href="/personal-page"
+                className="hover:text-romance-highlight mdl:inline hidden transition"
+              >
+                이미지 게임
+              </Link>
             </h1>
           </div>
 
@@ -87,7 +96,7 @@ export default function QuestionPage() {
           </div>
 
           <div className="no-scrollbar mdl:grid-cols-7 mdl:gap-x-5 mdl:gap-y-6 mdl:p-2 grid min-h-0 flex-1 grid-cols-3 content-start gap-x-4 gap-y-6 overflow-y-auto p-2">
-            {questionsQuery.isLoading &&
+            {imageGameQuery.isLoading &&
               Array.from({ length: 21 }).map((_, index) => (
                 <div
                   key={index}
@@ -96,21 +105,21 @@ export default function QuestionPage() {
                 />
               ))}
 
-            {questionsQuery.isError && (
+            {imageGameQuery.isError && (
               <button
                 type="button"
-                onClick={() => questionsQuery.refetch()}
+                onClick={() => imageGameQuery.refetch()}
                 className="btn-press-in text-romance-accent col-span-3 rounded-2xl border border-white/80 bg-white/85 px-4 py-5 text-sm font-extrabold"
               >
-                문답 질문 다시 불러오기
+                이미지 게임 질문 다시 불러오기
               </button>
             )}
 
-            {!questionsQuery.isLoading &&
-              !questionsQuery.isError &&
+            {!imageGameQuery.isLoading &&
+              !imageGameQuery.isError &&
               questions.length === 0 && (
                 <p className="text-romance-muted col-span-3 py-8 text-center text-sm font-semibold">
-                  표시할 문답 질문이 없습니다
+                  표시할 이미지 게임 질문이 없습니다
                 </p>
               )}
 
@@ -120,14 +129,14 @@ export default function QuestionPage() {
               return (
                 <Link
                   key={question.id}
-                  href={`/question-page/${question.id}`}
+                  href={`/image-page/${question.id}`}
                   onClick={() => markQuestionClicked(question.id)}
                   className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center overflow-hidden rounded-2xl border text-2xl font-extrabold transition ${
                     isSelected
                       ? "border-romance-highlight bg-romance-accent text-white"
                       : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
-                  aria-label={`${question.id}번 문답 질문: ${question.question}`}
+                  aria-label={`${question.id}번 이미지 게임 질문: ${question.question}`}
                   title={question.question}
                 >
                   <span className="mdl:left-3 mdl:top-3 mdl:h-2.5 mdl:w-2.5 absolute left-2 top-2 h-2 w-2 rounded-full bg-current opacity-35" />

@@ -1,4 +1,6 @@
 export * from "./first-impression";
 export * from "./romance-choice";
 export * from "./romance-counsel";
+export * from "./romance-image-game";
+export * from "./romance-personal";
 export * from "./romance-question";
