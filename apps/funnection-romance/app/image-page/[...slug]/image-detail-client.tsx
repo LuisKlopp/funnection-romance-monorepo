@@ -202,12 +202,12 @@ export const ImageDetailClient = ({ id }: ImageDetailClientProps) => {
                       {id}번 질문
                     </p>
 
-                    <div className="mdl:flex hidden flex-wrap items-center justify-center gap-2">
+                    <div className="mdl:flex my-4 hidden w-full flex-wrap items-center justify-end gap-2">
                       <button
                         type="button"
                         onClick={handleShowVoteTotal}
                         disabled={voteTotalQuery.isFetching}
-                        className="btn-press-in rounded-full bg-white/80 px-3 py-1 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+                        className="btn-press-in rounded-full bg-white/80 px-3 py-1 text-base font-semibold text-slate-700 disabled:opacity-60"
                       >
                         {isVoteTotalVisible ? `${voteTotal}표` : "총 투표 수"}
                       </button>
@@ -215,7 +215,7 @@ export const ImageDetailClient = ({ id }: ImageDetailClientProps) => {
                         type="button"
                         onClick={handleToggleElio}
                         disabled={elioVisibilityMutation.isPending}
-                        className="btn-press-in rounded-full bg-slate-600 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                        className="btn-press-in rounded-full bg-slate-600 px-3 py-1 text-base font-semibold text-white disabled:opacity-50"
                       >
                         {showElio ? "Elio 숨기기" : "Elio 보이기"}
                       </button>

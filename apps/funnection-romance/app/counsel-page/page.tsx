@@ -140,8 +140,8 @@ export default function CounselPage() {
             !counselsQuery.isError &&
             counsels.length === 0 && (
               <div className="flex min-h-0 flex-1 items-center justify-center">
-                <p className="text-romance-muted text-center text-sm font-semibold">
-                  아직 등록된 고민이 없습니다
+                <p className="text-romance-muted text-center text-3xl font-medium">
+                  아직 제출된 고민이 없습니다.
                 </p>
               </div>
             )}

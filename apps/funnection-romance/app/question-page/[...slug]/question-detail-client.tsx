@@ -15,6 +15,8 @@ import {
 import { SubmitModal } from "@/components";
 import { ROMANCE_NICKNAME_STORAGE_KEY } from "@/constants/choice-questions";
 
+const ANSWER_REVEAL_DELAY_MS = 800;
+
 interface QuestionDetailClientProps {
   id: number;
 }
@@ -24,7 +26,12 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
   const [answer, setAnswer] = useState("");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [visibleAnswerCount, setVisibleAnswerCount] = useState(0);
+  const [checkedAnswerCount, setCheckedAnswerCount] = useState<number | null>(
+    null
+  );
   const [isRevealingAnswers, setIsRevealingAnswers] = useState(false);
+  const [isLoadingAnswersForReveal, setIsLoadingAnswersForReveal] =
+    useState(false);
   const revealTimeoutIds = useRef<number[]>([]);
 
   const questionQuery = useQuery({
@@ -54,7 +61,6 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
 
   const answerItems = answersQuery.data?.answers ?? [];
   const visibleAnswers = answerItems.slice(0, visibleAnswerCount);
-  const answerCount = answerItems.length;
   const trimmedAnswer = answer.trim();
   const isSubmitDisabled =
     trimmedAnswer.length === 0 || answerMutation.isPending;
@@ -95,38 +101,55 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
   };
 
   const handleShowAnswers = async () => {
-    if (isRevealingAnswers || visibleAnswerCount === answerCount) {
+    if (isRevealingAnswers || isLoadingAnswersForReveal) {
       return;
     }
 
+    setIsLoadingAnswersForReveal(true);
+
+    try {
+      const result = await answersQuery.refetch();
+      const nextAnswers = result.data?.answers ?? [];
+
+      setCheckedAnswerCount(nextAnswers.length);
+
+      if (visibleAnswerCount === nextAnswers.length) {
+        return;
+      }
+
+      if (nextAnswers.length === 0) {
+        return;
+      }
+
+      revealTimeoutIds.current.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+      revealTimeoutIds.current = [];
+      setVisibleAnswerCount(0);
+      setIsRevealingAnswers(true);
+
+      nextAnswers.forEach((_, index) => {
+        const timeoutId = window.setTimeout(
+          () => {
+            setVisibleAnswerCount(index + 1);
+
+            if (index === nextAnswers.length - 1) {
+              setIsRevealingAnswers(false);
+            }
+          },
+          (index + 1) * ANSWER_REVEAL_DELAY_MS
+        );
+
+        revealTimeoutIds.current.push(timeoutId);
+      });
+    } finally {
+      setIsLoadingAnswersForReveal(false);
+    }
+  };
+
+  const handleCheckAnswerCount = async () => {
     const result = await answersQuery.refetch();
-    const nextAnswers = result.data?.answers ?? [];
-
-    if (nextAnswers.length === 0) {
-      return;
-    }
-
-    revealTimeoutIds.current.forEach((timeoutId) => {
-      window.clearTimeout(timeoutId);
-    });
-    revealTimeoutIds.current = [];
-    setVisibleAnswerCount(0);
-    setIsRevealingAnswers(true);
-
-    nextAnswers.forEach((_, index) => {
-      const timeoutId = window.setTimeout(
-        () => {
-          setVisibleAnswerCount(index + 1);
-
-          if (index === nextAnswers.length - 1) {
-            setIsRevealingAnswers(false);
-          }
-        },
-        (index + 1) * 2000
-      );
-
-      revealTimeoutIds.current.push(timeoutId);
-    });
+    setCheckedAnswerCount(result.data?.answers.length ?? 0);
   };
 
   return (
@@ -232,19 +255,19 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
               <button
                 type="button"
                 onClick={handleShowAnswers}
-                disabled={
-                  answersQuery.isFetching ||
-                  isRevealingAnswers ||
-                  (answerCount > 0 && visibleAnswerCount === answerCount)
-                }
+                disabled={isLoadingAnswersForReveal || isRevealingAnswers}
                 className="btn-press-in mt-4 flex h-[58px] min-w-[190px] items-center justify-center rounded-xl bg-slate-600 px-7 text-lg font-extrabold text-white shadow-[0_10px_22px_rgba(61,76,101,0.24)] transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {answersQuery.isFetching ? "답변 확인" : "답변 확인"}
+                답변 확인
               </button>
 
-              <p className="absolute bottom-0 right-0 text-base font-extrabold text-slate-700">
-                답변 현황 : {visibleAnswerCount}
-              </p>
+              <button
+                type="button"
+                onClick={handleCheckAnswerCount}
+                className="absolute bottom-0 right-0 cursor-pointer text-base font-extrabold text-slate-700 disabled:cursor-pointer"
+              >
+                답변 현황 : {checkedAnswerCount ?? 0}
+              </button>
             </div>
           </div>
         </div>
