@@ -7,27 +7,30 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import {
   createRomanceQuestionAnswer,
+  getRomanceQuestion,
   getRomanceQuestionAnswers,
   romanceQuestionAnswersQueryKey,
+  romanceQuestionDetailQueryKey,
 } from "@/api";
 import { SubmitModal } from "@/components";
 import { ROMANCE_NICKNAME_STORAGE_KEY } from "@/constants/choice-questions";
 
 interface QuestionDetailClientProps {
   id: number;
-  question: string;
 }
 
-export const QuestionDetailClient = ({
-  id,
-  question,
-}: QuestionDetailClientProps) => {
+export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
   const queryClient = useQueryClient();
   const [answer, setAnswer] = useState("");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [visibleAnswerCount, setVisibleAnswerCount] = useState(0);
   const [isRevealingAnswers, setIsRevealingAnswers] = useState(false);
   const revealTimeoutIds = useRef<number[]>([]);
+
+  const questionQuery = useQuery({
+    queryKey: romanceQuestionDetailQueryKey(id),
+    queryFn: () => getRomanceQuestion(id),
+  });
 
   const answersQuery = useQuery({
     queryKey: romanceQuestionAnswersQueryKey(id),
@@ -196,8 +199,21 @@ export const QuestionDetailClient = ({
 
             <div className="mdl:flex relative mx-auto hidden h-full w-full max-w-[820px] flex-col items-center justify-center gap-8">
               <p className="font-jua leading-tightPlus text-center text-[36px] font-medium text-slate-700">
-                {id}. {question}
+                {id}.{" "}
+                {questionQuery.isLoading
+                  ? "질문을 불러오는 중입니다"
+                  : questionQuery.data?.question}
               </p>
+
+              {questionQuery.isError && (
+                <button
+                  type="button"
+                  onClick={() => questionQuery.refetch()}
+                  className="btn-press-in text-romance-accent rounded-xl border border-white/80 bg-white/85 px-4 py-3 text-sm font-extrabold"
+                >
+                  질문 다시 불러오기
+                </button>
+              )}
 
               {visibleAnswers.length > 0 && (
                 <div className="flex w-full max-w-[680px] flex-col gap-3">

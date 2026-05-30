@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 
 import type { RomanceChoiceAnswerValue } from "@/api";
 import {
+  getRomanceChoice,
   getRomanceChoiceResult,
   getRomanceChoiceTotal,
+  romanceChoiceDetailQueryKey,
   romanceChoiceResultQueryKey,
   romanceChoiceTotalQueryKey,
   saveRomanceChoiceAnswer,
@@ -21,19 +23,20 @@ import {
 
 interface ChoiceDetailClientProps {
   id: number;
-  question: string;
 }
 
-export const ChoiceDetailClient = ({
-  id,
-  question: initialQuestion,
-}: ChoiceDetailClientProps) => {
+export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
   const queryClient = useQueryClient();
   const [selectedAnswer, setSelectedAnswer] =
     useState<RomanceChoiceAnswerValue | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [hasCheckedTotal, setHasCheckedTotal] = useState(false);
+
+  const choiceQuery = useQuery({
+    queryKey: romanceChoiceDetailQueryKey(id),
+    queryFn: () => getRomanceChoice(id),
+  });
 
   const resultQuery = useQuery({
     queryKey: romanceChoiceResultQueryKey(id),
@@ -82,7 +85,11 @@ export const ChoiceDetailClient = ({
 
   const result = resultQuery.data ?? { questionId: id, O: 0, X: 0 };
   const totalCount = totalQuery.data?.total ?? 0;
-  const isAnswerDisabled = answerMutation.isPending || !!selectedAnswer;
+  const isAnswerDisabled =
+    answerMutation.isPending ||
+    !!selectedAnswer ||
+    choiceQuery.isLoading ||
+    choiceQuery.isError;
 
   useEffect(() => {
     if (!submitMessage) return;
@@ -154,12 +161,25 @@ export const ChoiceDetailClient = ({
         <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-10 mt-4 flex min-h-0 flex-1 flex-col justify-center rounded-[28px] border border-white/70 p-4 backdrop-blur">
           <div className="mdl:gap-12 mx-auto flex w-full max-w-[820px] flex-col items-center gap-6">
             <p className="text-romance-ink font-jua leading-tightPlus mdl:block mdl:text-4xl hidden break-keep text-center text-xl font-medium text-slate-800">
-              {id}. {initialQuestion}
+              {id}.{" "}
+              {choiceQuery.isLoading
+                ? "질문을 불러오는 중입니다"
+                : choiceQuery.data?.question}
             </p>
 
             <p className="text-shadow-01 mdl:hidden text-center text-2xl font-extrabold text-slate-800">
               {id}번 질문
             </p>
+
+            {choiceQuery.isError && (
+              <button
+                type="button"
+                onClick={() => choiceQuery.refetch()}
+                className="btn-press-in text-romance-accent rounded-xl border border-white/80 bg-white/85 px-4 py-3 text-sm font-extrabold"
+              >
+                질문 다시 불러오기
+              </button>
+            )}
 
             <div className="mdl:hidden grid w-full grid-cols-1 gap-4">
               <AnswerButton

@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { questionItems } from "@/constants/question-questions";
-
 import { QuestionDetailClient } from "./question-detail-client";
 
 type QuestionDetailPageProps = {
@@ -18,11 +16,5 @@ export default async function QuestionDetailPage({
     notFound();
   }
 
-  const question = questionItems[id - 1];
-
-  if (!question) {
-    notFound();
-  }
-
-  return <QuestionDetailClient id={id} question={question} />;
+  return <QuestionDetailClient id={id} />;
 }

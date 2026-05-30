@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { oxQuestions } from "@/constants/choice-questions";
-
 import { ChoiceDetailClient } from "./choice-detail-client";
 
 type ChoiceDetailPageProps = {
@@ -18,11 +16,5 @@ export default async function ChoiceDetailPage({
     notFound();
   }
 
-  const question = oxQuestions[id - 1];
-
-  if (!question) {
-    notFound();
-  }
-
-  return <ChoiceDetailClient id={id} question={question} />;
+  return <ChoiceDetailClient id={id} />;
 }
