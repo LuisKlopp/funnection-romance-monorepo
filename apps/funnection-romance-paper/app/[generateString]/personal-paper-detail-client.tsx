@@ -37,10 +37,10 @@ export const PersonalPaperDetailClient = ({
           </Link>
 
           <div className="min-w-0 flex-1 text-center">
-            <p className="text-xs font-bold text-[#d94c6a] mdl:text-sm">
+            <p className="mdl:text-sm text-xs font-bold text-[#d94c6a]">
               받은 메시지
             </p>
-            <h1 className="text-shadow-01 mt-1 truncate text-2xl font-extrabold text-[#8b2248] mdl:text-[40px]">
+            <h1 className="text-shadow-01 mdl:text-[40px] mt-1 truncate text-2xl font-extrabold text-[#8b2248]">
               {messagesQuery.isLoading ? "퍼스널 페이퍼" : recipientNickname}
             </h1>
           </div>
@@ -48,7 +48,7 @@ export const PersonalPaperDetailClient = ({
           <div className="h-10 min-w-20" aria-hidden="true" />
         </header>
 
-        <div className="box-shadow-02 mt-5 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/80 bg-white/60 p-4 backdrop-blur mdl:mt-8 mdl:rounded-[32px] mdl:p-6">
+        <div className="box-shadow-02 mdl:mt-8 mdl:rounded-[32px] mdl:p-6 mt-5 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/80 bg-white/60 p-4 backdrop-blur">
           {messagesQuery.isLoading && (
             <div className="flex min-h-0 flex-1 flex-col gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
@@ -86,7 +86,7 @@ export const PersonalPaperDetailClient = ({
           {!messagesQuery.isLoading &&
             !messagesQuery.isError &&
             messages.length > 0 && (
-              <div className="no-scrollbar grid min-h-0 flex-1 grid-cols-1 content-start items-start gap-3 overflow-y-auto pr-1 mdl:grid-cols-2 mdl:gap-4">
+              <div className="no-scrollbar mdl:grid-cols-2 mdl:gap-4 grid min-h-0 flex-1 grid-cols-1 content-start items-start gap-3 overflow-y-auto p-1">
                 {messages.map((message) => (
                   <PersonalPaperMessageCard
                     key={message.id}
@@ -106,14 +106,13 @@ const PersonalPaperMessageCard = ({
 }: {
   message: PersonalPaperMessage;
 }) => {
-  const fontClassName = message.font && message.font !== "default"
-    ? message.font
-    : "";
+  const fontClassName =
+    message.font && message.font !== "default" ? message.font : "";
 
   return (
-    <article className="box-shadow-02 flex h-fit flex-col rounded-2xl border border-white/80 bg-white/90 px-5 py-4">
+    <article className="box-shadow-02 bg-romance-accent flex h-fit flex-col rounded-2xl border border-white/45 px-5 py-4">
       <p
-        className={`${fontClassName} whitespace-pre-wrap break-words text-base font-semibold leading-relaxed text-slate-800 mdl:text-lg`}
+        className={`${fontClassName} mdl:text-lg whitespace-pre-wrap break-words text-base font-semibold leading-relaxed text-white`}
       >
         {message.message}
       </p>

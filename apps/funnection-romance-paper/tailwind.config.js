@@ -87,6 +87,18 @@ const config = {
           8: "#1F2937",
           9: "#111827",
         },
+        romance: {
+          background: "#FFF9F4",
+          surface: "#FFFDFB",
+          tint: "#FFE8DD",
+          blush: "#FFD5E2",
+          highlight: "#D94C6A",
+          accent: "#8B2248",
+          ink: "#33242B",
+          muted: "#795E67",
+          line: "#F3B8C5",
+          mint: "#E76F83",
+        },
         lightPurple: "#c9bdcb",
 
         border: "hsl(var(--border))",
