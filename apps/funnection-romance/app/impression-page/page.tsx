@@ -418,7 +418,7 @@ export default function ImpressionPage() {
 
             <div className="border-romance-line/45 mt-6 flex min-h-[46px] items-center justify-between gap-3 border-t pt-5">
               {isNicknameVisible ? (
-                <p className="text-romance-ink text-xl font-extrabold">
+                <p className="text-romance-ink text-2xl font-semibold">
                   {selectedResult.nickname}
                 </p>
               ) : (
