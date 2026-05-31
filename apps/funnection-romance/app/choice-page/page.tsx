@@ -129,7 +129,6 @@ export default function ChoicePage() {
                       : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
                   aria-label={`${choice.id}번 OX 질문: ${choice.question}`}
-                  title={choice.question}
                 >
                   <span className="mdl:left-3 mdl:top-3 mdl:h-2.5 mdl:w-2.5 absolute left-2 top-2 h-2 w-2 rounded-full bg-current opacity-35" />
                   <span>{choice.id}</span>

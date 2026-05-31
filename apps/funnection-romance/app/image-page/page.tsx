@@ -136,7 +136,6 @@ export default function ImagePage() {
                       : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
                   aria-label={`${question.id}번 이미지 게임 질문: ${question.question}`}
-                  title={question.question}
                 >
                   <span className="mdl:left-3 mdl:top-3 mdl:h-2.5 mdl:w-2.5 absolute left-2 top-2 h-2 w-2 rounded-full bg-current opacity-35" />
                   <span>{question.id}</span>
