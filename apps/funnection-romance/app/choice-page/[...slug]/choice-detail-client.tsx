@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { RomanceChoiceAnswerValue } from "@/api";
 import {
@@ -31,7 +31,9 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
     useState<RomanceChoiceAnswerValue | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [animatedResult, setAnimatedResult] = useState({ O: 0, X: 0 });
   const [hasCheckedTotal, setHasCheckedTotal] = useState(false);
+  const resultAnimationRef = useRef<number | null>(null);
 
   const choiceQuery = useQuery({
     queryKey: romanceChoiceDetailQueryKey(id),
@@ -83,7 +85,6 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
     },
   });
 
-  const result = resultQuery.data ?? { questionId: id, O: 0, X: 0 };
   const totalCount = totalQuery.data?.total ?? 0;
   const isAnswerDisabled =
     answerMutation.isPending ||
@@ -101,6 +102,14 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
     return () => window.clearTimeout(timeoutId);
   }, [submitMessage]);
 
+  useEffect(() => {
+    return () => {
+      if (resultAnimationRef.current !== null) {
+        window.clearInterval(resultAnimationRef.current);
+      }
+    };
+  }, []);
+
   const handleAnswerClick = (answer: RomanceChoiceAnswerValue) => {
     if (isAnswerDisabled) return;
 
@@ -115,10 +124,44 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
   };
 
   const handleShowResults = async () => {
-    const result = await resultQuery.refetch();
+    const fetchedResult = await resultQuery.refetch();
 
-    if (result.data) {
+    if (fetchedResult.data) {
+      const targetO = fetchedResult.data.O;
+      const targetX = fetchedResult.data.X;
+      let currentO = 0;
+      let currentX = 0;
+      let turn: RomanceChoiceAnswerValue = "O";
+
+      if (resultAnimationRef.current !== null) {
+        window.clearInterval(resultAnimationRef.current);
+      }
+
+      setAnimatedResult({ O: 0, X: 0 });
       setShowResults(true);
+
+      resultAnimationRef.current = window.setInterval(() => {
+        if (turn === "O" && currentO < targetO) {
+          currentO += 1;
+          turn = "X";
+        } else if (turn === "X" && currentX < targetX) {
+          currentX += 1;
+          turn = "O";
+        } else if (currentO < targetO) {
+          currentO += 1;
+        } else if (currentX < targetX) {
+          currentX += 1;
+        }
+
+        setAnimatedResult({ O: currentO, X: currentX });
+
+        if (currentO === targetO && currentX === targetX) {
+          if (resultAnimationRef.current !== null) {
+            window.clearInterval(resultAnimationRef.current);
+            resultAnimationRef.current = null;
+          }
+        }
+      }, 350);
     }
   };
 
@@ -198,12 +241,12 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
               <div className="mx-auto flex w-full max-w-[560px] items-start justify-center gap-24">
                 <AnswerResult
                   answer="O"
-                  count={result.O}
+                  count={animatedResult.O}
                   showCount={showResults}
                 />
                 <AnswerResult
                   answer="X"
-                  count={result.X}
+                  count={animatedResult.X}
                   showCount={showResults}
                 />
               </div>
@@ -317,15 +360,44 @@ const AnswerResult = ({
         {answer}
       </span>
       {showCount && (
-        <div className="relative flex min-h-10 items-start justify-center">
-          <span className="text-shadow-01 mdl:text-[40px] text-[28px] font-semibold text-slate-800">
-            {count}
-          </span>
-          <span className="text-romance-muted ml-1 pt-3 text-sm font-bold">
-            개
-          </span>
+        <div className="fade-in-up flex flex-col items-center gap-2">
+          <div className="flex min-h-10 items-start justify-center">
+            <span
+              className={`text-shadow-01 mdl:text-[40px] text-[28px] font-semibold ${
+                count === 0
+                  ? "text-slate-800"
+                  : isPositive
+                    ? "text-[#2563eb]"
+                    : "text-[#dc2626]"
+              }`}
+            >
+              {count}
+            </span>
+            <span className="text-romance-muted ml-1 pt-3 text-sm font-bold">
+              개
+            </span>
+          </div>
+          <PeopleCounter count={count} />
         </div>
       )}
+    </div>
+  );
+};
+
+const PeopleCounter = ({ count }: { count: number }) => {
+  return (
+    <div className="relative h-6 w-[180px]">
+      <div className="absolute left-[calc(50%-10px)] top-0 flex w-[100px] flex-wrap justify-start gap-0.5">
+        {Array.from({ length: count }).map((_, index) => (
+          <span
+            key={index}
+            className="animate-pop text-xl leading-none"
+            aria-hidden="true"
+          >
+            👤
+          </span>
+        ))}
+      </div>
     </div>
   );
 };

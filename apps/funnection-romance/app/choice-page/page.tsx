@@ -125,8 +125,8 @@ export default function ChoicePage() {
                   onClick={() => markChoiceAsClicked(choice.id)}
                   className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center overflow-hidden rounded-2xl border text-2xl font-extrabold transition ${
                     isSelected
-                      ? "border-romance-highlight bg-romance-accent text-white"
-                      : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
+                      ? "bg-romance-accent text-white"
+                      : "text-romance-accent hover:border-romance-tint hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
                   aria-label={`${choice.id}번 OX 질문: ${choice.question}`}
                 >

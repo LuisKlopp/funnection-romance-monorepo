@@ -67,7 +67,7 @@ export default function QuestionPage() {
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
               <Link
                 href="/image-page"
-                className="transition hover:text-romance-highlight"
+                className="hover:text-romance-highlight transition"
               >
                 문답 질문
               </Link>
@@ -129,8 +129,8 @@ export default function QuestionPage() {
                   onClick={() => markQuestionClicked(question.id)}
                   className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center overflow-hidden rounded-2xl border text-2xl font-extrabold transition ${
                     isSelected
-                      ? "border-romance-highlight bg-romance-accent text-white"
-                      : "text-romance-accent hover:border-romance-line hover:bg-romance-tint border-white/85 bg-white/90"
+                      ? "bg-romance-accent text-white"
+                      : "text-romance-accent hover:border-romance-tint hover:bg-romance-tint border-white/85 bg-white/90"
                   }`}
                   aria-label={`${question.id}번 문답 질문: ${question.question}`}
                 >

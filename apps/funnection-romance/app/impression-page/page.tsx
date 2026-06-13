@@ -406,9 +406,9 @@ export default function ImpressionPage() {
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {selectedResult.impressions.map((impression) => (
+              {selectedResult.impressions.map((impression, index) => (
                 <span
-                  key={impression}
+                  key={`${selectedResult.index}-${impression}-${index}`}
                   className="bg-romance-tint text-romance-accent rounded-full px-3 py-1.5 text-base font-extrabold"
                 >
                   {impression}

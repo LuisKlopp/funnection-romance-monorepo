@@ -5,6 +5,7 @@ import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
+import type { RomanceAnswer } from "@/api";
 import {
   createRomanceQuestionAnswer,
   getRomanceQuestion,
@@ -25,6 +26,7 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
   const queryClient = useQueryClient();
   const [answer, setAnswer] = useState("");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [shuffledAnswers, setShuffledAnswers] = useState<RomanceAnswer[]>([]);
   const [visibleAnswerCount, setVisibleAnswerCount] = useState(0);
   const [checkedAnswerCount, setCheckedAnswerCount] = useState<number | null>(
     null
@@ -59,8 +61,7 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
     },
   });
 
-  const answerItems = answersQuery.data?.answers ?? [];
-  const visibleAnswers = answerItems.slice(0, visibleAnswerCount);
+  const visibleAnswers = shuffledAnswers.slice(0, visibleAnswerCount);
   const trimmedAnswer = answer.trim();
   const isSubmitDisabled =
     trimmedAnswer.length === 0 || answerMutation.isPending;
@@ -110,14 +111,13 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
     try {
       const result = await answersQuery.refetch();
       const nextAnswers = result.data?.answers ?? [];
+      const nextShuffledAnswers = shuffleAnswers(nextAnswers);
 
       setCheckedAnswerCount(nextAnswers.length);
 
-      if (visibleAnswerCount === nextAnswers.length) {
-        return;
-      }
-
       if (nextAnswers.length === 0) {
+        setShuffledAnswers([]);
+        setVisibleAnswerCount(0);
         return;
       }
 
@@ -125,15 +125,16 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
         window.clearTimeout(timeoutId);
       });
       revealTimeoutIds.current = [];
+      setShuffledAnswers(nextShuffledAnswers);
       setVisibleAnswerCount(0);
       setIsRevealingAnswers(true);
 
-      nextAnswers.forEach((_, index) => {
+      nextShuffledAnswers.forEach((_, index) => {
         const timeoutId = window.setTimeout(
           () => {
             setVisibleAnswerCount(index + 1);
 
-            if (index === nextAnswers.length - 1) {
+            if (index === nextShuffledAnswers.length - 1) {
               setIsRevealingAnswers(false);
             }
           },
@@ -281,6 +282,20 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
 
 const getSavedNickname = () =>
   localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
+
+const shuffleAnswers = (answers: RomanceAnswer[]) => {
+  const shuffledAnswers = [...answers];
+
+  for (let index = shuffledAnswers.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledAnswers[index], shuffledAnswers[randomIndex]] = [
+      shuffledAnswers[randomIndex],
+      shuffledAnswers[index],
+    ];
+  }
+
+  return shuffledAnswers;
+};
 
 const SubmittingOverlay = () => {
   return (
