@@ -41,7 +41,7 @@ const romancePersonalApi = axios.create({
 
 export const getRomancePersonalUsers = async () => {
   const { data } = await romancePersonalApi.get<RomancePersonalUser[]>(
-    "/funnection-romance/history-user"
+    "/funnection-romance/history-user/current-users"
   );
 
   return data;

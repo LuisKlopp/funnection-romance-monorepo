@@ -116,7 +116,7 @@ const PersonalUserCard = ({
   return (
     <Link
       href={`/personal-page/${encodeURIComponent(user.generateString)}`}
-      className="btn-press-in text-romance-accent flex flex-col items-center gap-2 transition"
+      className="group text-romance-accent flex flex-col items-center gap-2"
     >
       <span className="relative">
         {isSubmitted && (
@@ -131,7 +131,7 @@ const PersonalUserCard = ({
           width={132}
           height={176}
           decoding="async"
-          className="shadow-soft-card mdl:h-[176px] mdl:w-[132px] mdl:border-[3px] h-[136px] w-[102px] rounded-lg border-2 border-slate-700 bg-white object-contain"
+          className="shadow-soft-card mdl:h-[176px] mdl:w-[132px] mdl:border-[3px] h-[136px] w-[102px] rounded-lg border-2 border-slate-700 bg-white object-contain transition-transform duration-150 ease-out group-active:scale-[0.98]"
         />
       </span>
       <span className="mdl:max-w-[132px] mdl:text-xl max-w-[102px] truncate text-center text-base font-extrabold">
