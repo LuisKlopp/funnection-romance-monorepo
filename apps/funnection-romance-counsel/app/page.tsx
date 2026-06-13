@@ -32,7 +32,7 @@ export default function Home() {
 
     const timeoutId = window.setTimeout(() => {
       setSubmitMessage(null);
-    }, 1600);
+    }, 3000);
 
     return () => window.clearTimeout(timeoutId);
   }, [submitMessage]);
@@ -76,7 +76,7 @@ export default function Home() {
             maxLength={MAX_COUNSEL_LENGTH}
             placeholder="고민을 입력해주세요"
             autoFocus
-            className="text-romance-ink placeholder:text-romance-muted/45 focus:border-romance-accent focus:ring-romance-accent/20 mdl:min-h-[260px] min-h-[240px] w-full resize-none rounded-[24px] border border-white/85 bg-white/90 px-5 py-5 text-base font-semibold leading-relaxed outline-none transition focus:bg-white focus:ring-4"
+            className="text-romance-ink placeholder:text-romance-muted/45 focus:border-romance-accent focus:ring-romance-accent/20 mdl:min-h-[260px] min-h-[240px] w-full resize-none rounded-[24px] border border-white/85 bg-white/90 px-5 py-5 text-base font-semibold leading-relaxed shadow-[0_8px_24px_rgba(95,58,74,0.16),inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:bg-white focus:shadow-[0_10px_30px_rgba(242,109,139,0.2)] focus:ring-4"
             aria-label="익명 고민 입력"
           />
 
@@ -101,8 +101,14 @@ export default function Home() {
       </form>
 
       {submitMessage && (
-        <div className="fixed inset-x-0 bottom-8 z-50 flex justify-center px-5">
-          <div className="shadow-soft-card bg-romance-surface/95 text-romance-accent rounded-2xl border border-white/80 px-5 py-4 text-sm font-extrabold backdrop-blur">
+        <div
+          className="submit-modal-overlay fixed inset-0 z-50 flex items-center justify-center px-5"
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+          aria-label="제출 결과"
+        >
+          <div className="submit-modal-fade-up shadow-soft-card bg-romance-surface/95 text-romance-accent w-full max-w-[320px] rounded-[24px] border border-white/80 px-6 py-5 text-center text-base font-extrabold backdrop-blur">
             {submitMessage}
           </div>
         </div>
