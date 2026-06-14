@@ -40,6 +40,7 @@ export default function CounselPage() {
     [counsels, shuffleSeed]
   );
   const currentCounsel = shuffledCounsels[currentIndex];
+  const hasNextCounsel = currentIndex < shuffledCounsels.length - 1;
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -53,9 +54,9 @@ export default function CounselPage() {
   };
 
   const showNextCounsel = () => {
-    if (shuffledCounsels.length === 0) return;
+    if (!hasNextCounsel) return;
 
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % shuffledCounsels.length);
+    setCurrentIndex((prevIndex) => prevIndex + 1);
   };
 
   const reshuffleCounsels = () => {
@@ -166,14 +167,16 @@ export default function CounselPage() {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={showNextCounsel}
-                      className="btn-press-in bg-romance-accent shadow-soft-card mt-6 flex h-12 min-w-[160px] items-center justify-center gap-2 rounded-full border border-white/80 px-6 text-sm font-extrabold text-white transition hover:brightness-105"
-                    >
-                      다음 고민
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
+                    {hasNextCounsel && (
+                      <button
+                        type="button"
+                        onClick={showNextCounsel}
+                        className="btn-press-in bg-romance-accent shadow-soft-card mt-6 flex h-12 min-w-[160px] items-center justify-center gap-2 rounded-full border border-white/80 px-6 text-sm font-extrabold text-white transition hover:brightness-105"
+                      >
+                        다음 고민
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </>
                 )}
               </div>
