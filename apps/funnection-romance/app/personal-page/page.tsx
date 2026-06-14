@@ -57,7 +57,7 @@ export default function PersonalPage() {
         </header>
 
         <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-6 mt-4 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/70 p-3 backdrop-blur">
-          <div className="no-scrollbar mdl:flex mdl:flex-wrap mdl:items-start mdl:justify-center mdl:gap-x-6 mdl:gap-y-5 grid min-h-0 flex-1 grid-cols-2 content-start gap-x-4 gap-y-5 overflow-y-auto p-2">
+          <div className="no-scrollbar mdl:flex mdl:flex-wrap mdl:items-start mdl:justify-center mdl:gap-x-6 mdl:gap-y-5 grid min-h-0 flex-1 touch-pan-y grid-cols-2 content-start gap-x-4 gap-y-5 overflow-x-hidden overflow-y-auto overscroll-x-none p-2">
             {usersQuery.isLoading &&
               Array.from({ length: 9 }).map((_, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">

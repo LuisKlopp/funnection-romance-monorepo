@@ -88,7 +88,7 @@ export default function ChoicePage() {
             </p>
           </div>
 
-          <div className="no-scrollbar mdl:grid-cols-7 mdl:gap-x-5 mdl:gap-y-6 mdl:p-2 grid min-h-0 flex-1 grid-cols-3 content-start gap-x-4 gap-y-6 overflow-y-auto p-2">
+          <div className="no-scrollbar mdl:grid-cols-7 mdl:gap-x-5 mdl:gap-y-6 mdl:p-2 grid min-h-0 flex-1 touch-pan-y grid-cols-3 content-start gap-x-4 gap-y-6 overflow-x-hidden overflow-y-auto overscroll-x-none p-2">
             {choicesQuery.isLoading &&
               Array.from({ length: 21 }).map((_, index) => (
                 <div
