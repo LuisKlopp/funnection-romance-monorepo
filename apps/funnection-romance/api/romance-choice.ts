@@ -1,10 +1,13 @@
 import axios from "axios";
 
+import type { RomanceCategory } from "./romance-category";
+
 export type RomanceChoiceAnswerValue = "O" | "X";
 
 export type RomanceChoice = {
   id: number;
   question: string;
+  category: RomanceCategory;
 };
 
 export type RomanceChoiceAnswer = {

@@ -37,7 +37,7 @@ const menuItems = [
   },
   {
     href: "/counsel-page",
-    title: "대나무숲",
+    title: "익명 고민방",
     description: "익명 고민을 하나씩 둘러봐요.",
     icon: Trees,
     requiresNickname: false,

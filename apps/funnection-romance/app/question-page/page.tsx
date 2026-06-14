@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { getRomanceQuestions, ROMANCE_QUESTION_QUERY_KEY } from "@/api";
+import { QuestionCategoryBadge } from "@/components";
 import { QUESTION_ANSWERED_STORAGE_KEY } from "@/constants/question-questions";
 
 export default function QuestionPage() {
@@ -127,7 +128,7 @@ export default function QuestionPage() {
                   key={question.id}
                   href={`/question-page/${question.id}`}
                   onClick={() => markQuestionClicked(question.id)}
-                  className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center overflow-hidden rounded-2xl border text-2xl font-extrabold transition ${
+                  className={`btn-press-in shadow-soft-card mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center rounded-2xl border text-2xl font-extrabold transition ${
                     isSelected
                       ? "bg-romance-accent text-white"
                       : "text-romance-accent hover:border-romance-tint hover:bg-romance-tint border-white/85 bg-white/90"
@@ -135,6 +136,7 @@ export default function QuestionPage() {
                   aria-label={`${question.id}번 문답 질문: ${question.question}`}
                 >
                   <span className="mdl:left-3 mdl:top-3 mdl:h-2.5 mdl:w-2.5 absolute left-2 top-2 h-2 w-2 rounded-full bg-current opacity-35" />
+                  <QuestionCategoryBadge category={question.category} />
                   <span>{question.id}</span>
                 </Link>
               );

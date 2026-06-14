@@ -66,10 +66,10 @@ export default function CounselPage() {
     <main className="bg-romance-gradient text-romance-ink fixed inset-0 flex h-[100dvh] w-full">
       <section className="mdl:hidden mx-auto flex h-full w-full max-w-[480px] flex-col items-center justify-center px-5 text-center">
         <h1 className="text-romance-accent text-shadow-01 text-3xl font-extrabold">
-          대나무숲
+          익명 고민방
         </h1>
         <p className="text-romance-muted leading-middlePlus mt-3 text-sm font-semibold">
-          대나무숲은 데스크톱 화면에서만 이용할 수 있습니다.
+          익명 고민방은 데스크톱 화면에서만 이용할 수 있습니다.
         </p>
         <Link
           href="/"
@@ -95,7 +95,7 @@ export default function CounselPage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              대나무숲
+              익명 고민방
             </h1>
           </div>
 
