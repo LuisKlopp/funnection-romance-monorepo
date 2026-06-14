@@ -86,7 +86,7 @@ export const PersonalPaperDetailClient = ({
           {!messagesQuery.isLoading &&
             !messagesQuery.isError &&
             messages.length > 0 && (
-              <div className="no-scrollbar mdl:grid-cols-2 mdl:gap-4 grid min-h-0 flex-1 grid-cols-1 content-start items-start gap-3 overflow-y-auto p-1">
+              <div className="no-scrollbar grid min-h-0 flex-1 grid-cols-1 content-start items-start gap-3 overflow-y-auto p-1">
                 {messages.map((message) => (
                   <PersonalPaperMessageCard
                     key={message.id}
@@ -108,13 +108,18 @@ const PersonalPaperMessageCard = ({
 }) => {
   const fontClassName =
     message.font && message.font !== "default" ? message.font : "";
+  const normalizedMessage = message.message
+    .replace(/\\n/g, " ")
+    .replace(/\r?\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   return (
-    <article className="box-shadow-02 bg-romance-accent flex h-fit flex-col rounded-2xl border border-white/45 px-5 py-4">
+    <article className="box-shadow-02 bg-romance-accent flex h-fit w-full flex-col rounded-2xl border border-white/45 px-5 py-4">
       <p
-        className={`${fontClassName} mdl:text-lg whitespace-pre-wrap break-words text-base font-semibold leading-relaxed text-white`}
+        className={`${fontClassName} mdl:text-lg break-words text-base font-semibold leading-relaxed text-white`}
       >
-        {message.message}
+        {normalizedMessage}
       </p>
     </article>
   );
