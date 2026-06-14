@@ -24,6 +24,7 @@ export type PersonalPaperMessagesResponse = {
 export const PERSONAL_PAPER_RECIPIENTS_QUERY_KEY = [
   "funnection-romance",
   "history-user",
+  "current-users",
 ] as const;
 
 export const personalPaperMessagesQueryKey = (generateString: string) =>
@@ -40,7 +41,7 @@ const personalPaperApi = axios.create({
 
 export const getPersonalPaperRecipients = async () => {
   const { data } = await personalPaperApi.get<PersonalPaperRecipient[]>(
-    "/funnection-romance/history-user"
+    "/funnection-romance/history-user/current-users"
   );
 
   return data;
