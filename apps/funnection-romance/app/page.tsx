@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  HeartHandshake,
   MessageCircle,
   PenLine,
   Sparkles,
@@ -33,6 +34,13 @@ const menuItems = [
     title: "연애특집 문답",
     description: "떠오르는 생각을 그대로 표현해주세요.",
     icon: PenLine,
+    requiresNickname: true,
+  },
+  {
+    href: "/love-language-page",
+    title: "사랑의 언어",
+    description: "내가 원하는 사랑의 표현을 순서대로 알아봐요.",
+    icon: HeartHandshake,
     requiresNickname: true,
   },
   {

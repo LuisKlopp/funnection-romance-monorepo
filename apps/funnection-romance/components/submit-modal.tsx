@@ -5,6 +5,7 @@ interface SubmitModalProps {
   children?: ReactNode;
   className?: string;
   overlayClassName?: string;
+  position?: "absolute" | "fixed";
 }
 
 const mergeClassNames = (...classNames: Array<string | undefined>) =>
@@ -15,11 +16,13 @@ export const SubmitModal = ({
   children,
   className,
   overlayClassName,
+  position = "absolute",
 }: SubmitModalProps) => {
   return (
     <div
       className={mergeClassNames(
-        "absolute inset-0 z-50 flex items-center justify-center bg-black/30",
+        position === "fixed" ? "fixed" : "absolute",
+        "inset-0 z-50 flex items-center justify-center bg-black/30",
         overlayClassName
       )}
     >
