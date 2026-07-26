@@ -5,7 +5,7 @@ import {
   MessageCircle,
   PenLine,
   Sparkles,
-  Trees,
+  // Trees,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -35,14 +35,14 @@ const menuItems = [
     icon: PenLine,
     requiresNickname: true,
   },
-  {
-    href: "/counsel-page",
-    title: "익명 고민방",
-    description: "익명 고민을 하나씩 둘러봐요.",
-    icon: Trees,
-    requiresNickname: false,
-    desktopOnly: true,
-  },
+  // {
+  //   href: "/counsel-page",
+  //   title: "익명 고민방",
+  //   description: "익명 고민을 하나씩 둘러봐요.",
+  //   icon: Trees,
+  //   requiresNickname: false,
+  //   desktopOnly: true,
+  // },
 ] as const;
 
 export default function Home() {
