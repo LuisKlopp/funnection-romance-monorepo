@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  Mail,
   MessageCircle,
   PenLine,
   Sparkles,
@@ -19,6 +20,13 @@ const menuItems = [
     title: "첫인상",
     description: "가볍게 남겨보는 첫 느낌",
     icon: Sparkles,
+    requiresNickname: false,
+  },
+  {
+    href: "/random-message",
+    title: "랜덤 메시지",
+    description: "편지 속 메시지를 하나 골라봐요.",
+    icon: Mail,
     requiresNickname: false,
   },
   {

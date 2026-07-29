@@ -150,3 +150,18 @@ body,
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.personal-paper-message-mosaic {
+  position: relative;
+}
+
+.personal-paper-message-mosaic-text {
+  display: inline;
+  filter: blur(2px);
+  opacity: 0.86;
+  text-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.35),
+    -1px 0 0 rgba(255, 255, 255, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.25);
+  user-select: none;
+}

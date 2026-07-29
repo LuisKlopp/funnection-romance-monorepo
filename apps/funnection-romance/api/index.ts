@@ -6,3 +6,4 @@ export * from "./romance-image-game";
 export * from "./romance-love-language";
 export * from "./romance-personal";
 export * from "./romance-question";
+export * from "./romance-random-message";
