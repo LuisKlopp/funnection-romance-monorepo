@@ -52,7 +52,7 @@ export default function RandomMessagePage() {
             </p>
           </div>
 
-          <div className="no-scrollbar mdl:grid-cols-7 mdl:gap-x-5 mdl:gap-y-6 mdl:p-2 grid min-h-0 flex-1 touch-pan-y grid-cols-3 content-start gap-x-4 gap-y-6 overflow-x-hidden overflow-y-auto overscroll-x-none p-2">
+          <div className="no-scrollbar mdl:grid-cols-5 mdl:gap-x-8 mdl:gap-y-8 mdl:p-2 grid min-h-0 flex-1 touch-pan-y grid-cols-3 content-start gap-x-4 gap-y-6 overflow-x-hidden overflow-y-auto overscroll-x-none p-2">
             {randomMessagesQuery.isLoading &&
               Array.from({ length: 21 }).map((_, index) => (
                 <div
@@ -93,7 +93,7 @@ export default function RandomMessagePage() {
                 <Image
                   src={LetterClosedCircle}
                   alt={`${randomMessage.id}번 랜덤 메시지 편지`}
-                  className="mdl:h-16 mdl:w-16 h-12 w-12 object-contain"
+                  className="mdl:h-24 mdl:w-24 h-16 w-16 object-contain"
                 />
               </Link>
             ))}
