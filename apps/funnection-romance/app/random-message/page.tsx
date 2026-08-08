@@ -4,20 +4,63 @@ import { useQuery } from "@tanstack/react-query";
 import { Home, RefreshCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import {
   getRomanceRandomMessages,
   ROMANCE_RANDOM_MESSAGE_QUERY_KEY,
 } from "@/api";
+import { RANDOM_MESSAGE_SELECTED_STORAGE_KEY } from "@/constants/random-message";
 import LetterClosedCircle from "@/public/images/letter-closed-circle.png";
 
 export default function RandomMessagePage() {
+  const [selectedMessageId, setSelectedMessageId] = useState<
+    number | null | undefined
+  >();
   const randomMessagesQuery = useQuery({
     queryKey: ROMANCE_RANDOM_MESSAGE_QUERY_KEY,
     queryFn: getRomanceRandomMessages,
   });
 
   const randomMessages = randomMessagesQuery.data ?? [];
+  const hasSelectedMessage = selectedMessageId !== null && selectedMessageId !== undefined;
+  const displayedMessages =
+    selectedMessageId === undefined
+      ? []
+      : selectedMessageId === null
+        ? randomMessages
+        : randomMessages.filter(
+            (randomMessage) => randomMessage.id === selectedMessageId
+          );
+
+  const saveSelectedMessage = (messageId: number) => {
+    setSelectedMessageId(messageId);
+    localStorage.setItem(
+      RANDOM_MESSAGE_SELECTED_STORAGE_KEY,
+      String(messageId)
+    );
+  };
+
+  useEffect(() => {
+    const savedMessageId = localStorage.getItem(
+      RANDOM_MESSAGE_SELECTED_STORAGE_KEY
+    );
+
+    if (!savedMessageId) {
+      setSelectedMessageId(null);
+      return;
+    }
+
+    const parsedMessageId = Number(savedMessageId);
+
+    if (Number.isInteger(parsedMessageId) && parsedMessageId > 0) {
+      setSelectedMessageId(parsedMessageId);
+      return;
+    }
+
+    localStorage.removeItem(RANDOM_MESSAGE_SELECTED_STORAGE_KEY);
+    setSelectedMessageId(null);
+  }, []);
 
   return (
     <main className="bg-romance-gradient text-romance-ink fixed inset-0 flex h-[100dvh] w-full">
@@ -48,12 +91,19 @@ export default function RandomMessagePage() {
         <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-6 mt-4 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/70 p-3 backdrop-blur">
           <div className="mdl:mb-5 mb-3 flex shrink-0 items-center justify-between gap-2 px-1">
             <p className="text-romance-muted mdl:text-base text-sm font-bold">
-              전체 {randomMessages.length}개
+              전체 {displayedMessages.length}개
             </p>
           </div>
 
-          <div className="no-scrollbar mdl:grid-cols-5 mdl:gap-x-8 mdl:gap-y-8 mdl:p-2 grid min-h-0 flex-1 touch-pan-y grid-cols-3 content-start gap-x-4 gap-y-6 overflow-x-hidden overflow-y-auto overscroll-x-none p-2">
-            {randomMessagesQuery.isLoading &&
+          <div
+            className={`no-scrollbar mdl:gap-x-8 mdl:gap-y-8 mdl:p-2 grid min-h-0 flex-1 touch-pan-y gap-x-4 gap-y-6 overflow-x-hidden overflow-y-auto overscroll-x-none p-2 ${
+              hasSelectedMessage
+                ? "mdl:grid-cols-5 grid-cols-3 content-center"
+                : "mdl:grid-cols-5 grid-cols-3 content-start"
+            }`}
+          >
+            {(randomMessagesQuery.isLoading ||
+              selectedMessageId === undefined) &&
               Array.from({ length: 21 }).map((_, index) => (
                 <div
                   key={index}
@@ -72,19 +122,23 @@ export default function RandomMessagePage() {
               </button>
             )}
 
-            {!randomMessagesQuery.isLoading &&
+            {selectedMessageId !== undefined &&
+              !randomMessagesQuery.isLoading &&
               !randomMessagesQuery.isError &&
-              randomMessages.length === 0 && (
+              displayedMessages.length === 0 && (
                 <p className="text-romance-muted col-span-3 py-8 text-center text-sm font-semibold">
                   표시할 랜덤 메시지가 없습니다
                 </p>
               )}
 
-            {randomMessages.map((randomMessage) => (
+            {displayedMessages.map((randomMessage) => (
               <Link
                 key={randomMessage.id}
                 href={`/random-message/${randomMessage.id}`}
-                className="btn-press-in shadow-soft-card text-romance-accent hover:border-romance-tint hover:bg-romance-tint mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center rounded-2xl border border-white/85 bg-white/90 transition"
+                onClick={() => saveSelectedMessage(randomMessage.id)}
+                className={`btn-press-in shadow-soft-card text-romance-accent hover:border-romance-tint hover:bg-romance-tint mdl:h-[112px] mdl:rounded-[24px] relative flex h-[96px] items-center justify-center rounded-2xl border border-white/85 bg-white/90 transition ${
+                  hasSelectedMessage ? "mdl:col-start-3 col-start-2" : ""
+                }`}
                 aria-label={`${randomMessage.id}번 랜덤 메시지 열기`}
               >
                 <span className="bg-romance-highlight absolute -right-2 -top-2 flex h-8 min-w-8 rotate-12 items-center justify-center rounded-full px-2 text-sm font-extrabold text-white shadow-sm">

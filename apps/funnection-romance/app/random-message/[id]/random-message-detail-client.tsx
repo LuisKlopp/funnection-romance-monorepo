@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Home, RefreshCcw } from "lucide-react";
+import { Home, RefreshCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -57,13 +57,7 @@ export const RandomMessageDetailClient = ({
     <main className="bg-romance-gradient text-romance-ink fixed inset-0 flex h-[100dvh] w-full">
       <section className="mdl:max-w-[860px] mdl:px-8 mdl:pb-8 mdl:pt-8 mx-auto flex h-full w-full max-w-[480px] flex-col px-4 pb-4 pt-5">
         <header className="flex shrink-0 items-center justify-between gap-3">
-          <Link
-            href="/random-message"
-            className="btn-press-in bg-romance-surface/85 text-romance-accent shadow-soft-card mdl:h-12 mdl:w-12 flex h-10 w-10 items-center justify-center rounded-full border border-white/80 backdrop-blur"
-            aria-label="랜덤 메시지 목록으로 이동"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+          <div className="mdl:h-12 mdl:w-12 h-10 w-10" aria-hidden="true" />
 
           <div className="min-w-0 flex-1 text-center">
             <p className="text-romance-highlight mdl:text-sm text-xs font-bold">
@@ -142,8 +136,8 @@ export const RandomMessageDetailClient = ({
                   />
                 </div>
 
-                <article className="shadow-soft-card flex max-h-full w-full max-w-[620px] overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-6 py-7">
-                  <p className="text-romance-ink mdl:text-xl min-h-[5.25rem] whitespace-pre-wrap break-keep text-center text-lg font-extrabold leading-relaxed">
+                <article className="shadow-soft-card flex max-h-full w-full max-w-[620px] items-center justify-center overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-6 py-7">
+                  <p className="text-romance-ink mdl:text-xl flex min-h-[5.25rem] items-center justify-center whitespace-pre-wrap break-keep text-center text-lg font-extrabold leading-relaxed">
                     {visibleMessage}
                   </p>
                 </article>
@@ -158,13 +152,6 @@ export const RandomMessageDetailClient = ({
           >
             <Home className="h-5 w-5" />
             Home
-          </Link>
-
-          <Link
-            href="/random-message"
-            className="btn-press-in bg-romance-accent shadow-soft-card mdl:min-w-[150px] mdl:text-base flex h-12 min-w-[128px] items-center justify-center rounded-full border border-white/80 px-5 text-sm font-extrabold text-white hover:brightness-105"
-          >
-            목록
           </Link>
         </footer>
       </section>
