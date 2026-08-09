@@ -182,15 +182,7 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
-          <div className="min-w-0 flex-1 text-center">
-            <p className="text-romance-highlight mdl:block mdl:text-sm hidden text-xs font-bold">
-              OX {id}번 질문
-            </p>
-            <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              <span className="mdl:hidden">연애특집 OX</span>
-              <span className="mdl:inline hidden">OX 질문</span>
-            </h1>
-          </div>
+          <div className="flex-1" aria-hidden="true" />
 
           <Link
             href="/"
@@ -201,8 +193,18 @@ export const ChoiceDetailClient = ({ id }: ChoiceDetailClientProps) => {
           </Link>
         </header>
 
-        <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-10 mt-4 flex min-h-0 flex-1 flex-col justify-center rounded-[28px] border border-white/70 p-4 backdrop-blur">
-          <div className="mdl:gap-12 mx-auto flex w-full max-w-[820px] flex-col items-center gap-6">
+        <div className="bg-romance-surface/55 shadow-soft-card mdl:mt-8 mdl:rounded-[32px] mdl:p-10 mt-4 flex min-h-0 flex-1 flex-col rounded-[28px] border border-white/70 p-4 backdrop-blur">
+          <div className="min-w-0 shrink-0 text-center">
+            <p className="text-romance-highlight mdl:block hidden text-lg font-bold">
+              퍼넥션 연애특집
+            </p>
+            <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
+              <span className="mdl:hidden">연애특집 OX</span>
+              <span className="mdl:inline hidden">OX 질문</span>
+            </h1>
+          </div>
+
+          <div className="mdl:gap-12 mx-auto flex min-h-0 w-full max-w-[820px] flex-1 flex-col items-center justify-center gap-6">
             <p className="text-romance-ink font-jua leading-tightPlus mdl:block mdl:text-4xl hidden break-keep text-center text-xl font-medium text-slate-800">
               {id}.{" "}
               {choiceQuery.isLoading

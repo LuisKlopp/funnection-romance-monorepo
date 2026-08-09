@@ -91,14 +91,7 @@ export default function CounselPage() {
             <Home className="h-5 w-5" />
           </Link>
 
-          <div className="min-w-0 flex-1 text-center">
-            <p className="text-romance-highlight mdl:text-sm text-xs font-bold">
-              Funnection 연애특집
-            </p>
-            <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              익명 고민방
-            </h1>
-          </div>
+          <div className="flex-1" aria-hidden="true" />
 
           <button
             type="button"
@@ -112,21 +105,30 @@ export default function CounselPage() {
         </header>
 
         <div className="bg-romance-surface/55 shadow-soft-card mt-8 flex min-h-0 flex-1 flex-col rounded-[32px] border border-white/70 p-8 backdrop-blur">
-          {counselsQuery.isLoading && (
-            <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
-              <div
-                className="shadow-soft-card h-[280px] rounded-[28px] border border-white/70 bg-white/45"
-                aria-hidden="true"
-              />
-              <div
-                className="mx-auto h-12 w-full max-w-[220px] rounded-full bg-white/45"
-                aria-hidden="true"
-              />
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8">
+            <div className="shrink-0 text-center">
+              <p className="text-romance-highlight text-lg font-bold">
+                Funnection 연애특집
+              </p>
+              <h1 className="text-romance-accent text-shadow-01 mt-1 text-[44px] font-extrabold leading-none">
+                익명 고민방
+              </h1>
             </div>
-          )}
 
-          {counselsQuery.isError && (
-            <div className="flex min-h-0 flex-1 items-center justify-center">
+            {counselsQuery.isLoading && (
+              <>
+                <div
+                  className="shadow-soft-card h-[280px] w-full rounded-[28px] border border-white/70 bg-white/45"
+                  aria-hidden="true"
+                />
+                <div
+                  className="h-12 w-full max-w-[220px] rounded-full bg-white/45"
+                  aria-hidden="true"
+                />
+              </>
+            )}
+
+            {counselsQuery.isError && (
               <button
                 type="button"
                 onClick={() => counselsQuery.refetch()}
@@ -134,53 +136,48 @@ export default function CounselPage() {
               >
                 고민 다시 불러오기
               </button>
-            </div>
-          )}
+            )}
 
-          {!counselsQuery.isLoading &&
-            !counselsQuery.isError &&
-            counsels.length === 0 && (
-              <div className="flex min-h-0 flex-1 items-center justify-center">
+            {!counselsQuery.isLoading &&
+              !counselsQuery.isError &&
+              counsels.length === 0 && (
                 <p className="text-romance-muted text-center text-3xl font-medium">
                   아직 제출된 고민이 없습니다.
                 </p>
-              </div>
-            )}
+              )}
 
-          {!counselsQuery.isLoading &&
-            !counselsQuery.isError &&
-            currentCounsel && (
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
-                {!isCounselOpen ? (
-                  <button
-                    type="button"
-                    onClick={openCounsel}
-                    className="btn-press-in bg-romance-accent shadow-soft-card flex h-14 min-w-[160px] items-center justify-center rounded-full border border-white/80 px-8 text-xl font-extrabold text-white transition hover:brightness-105"
-                  >
-                    들어보기
-                  </button>
-                ) : (
-                  <>
-                    <div className="shadow-soft-card min-h-70 inline-flex max-h-full w-full max-w-full overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-8 py-7">
-                      <p className="text-romance-ink font-jua whitespace-pre-wrap break-words text-2xl font-medium">
-                        {currentCounsel.content}
-                      </p>
-                    </div>
+            {!counselsQuery.isLoading &&
+              !counselsQuery.isError &&
+              currentCounsel &&
+              (!isCounselOpen ? (
+                <button
+                  type="button"
+                  onClick={openCounsel}
+                  className="btn-press-in bg-romance-accent shadow-soft-card flex h-14 min-w-[160px] items-center justify-center rounded-full border border-white/80 px-8 text-xl font-extrabold text-white transition hover:brightness-105"
+                >
+                  들어보기
+                </button>
+              ) : (
+                <>
+                  <div className="shadow-soft-card min-h-70 inline-flex max-h-full w-full max-w-full overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-8 py-7">
+                    <p className="text-romance-ink font-jua whitespace-pre-wrap break-words text-2xl font-medium">
+                      {currentCounsel.content}
+                    </p>
+                  </div>
 
-                    {hasNextCounsel && (
-                      <button
-                        type="button"
-                        onClick={showNextCounsel}
-                        className="btn-press-in bg-romance-accent shadow-soft-card mt-6 flex h-12 min-w-[160px] items-center justify-center gap-2 rounded-full border border-white/80 px-6 text-sm font-extrabold text-white transition hover:brightness-105"
-                      >
-                        다음 고민
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+                  {hasNextCounsel && (
+                    <button
+                      type="button"
+                      onClick={showNextCounsel}
+                      className="btn-press-in bg-romance-accent shadow-soft-card flex h-12 min-w-[160px] items-center justify-center gap-2 rounded-full border border-white/80 px-6 text-sm font-extrabold text-white transition hover:brightness-105"
+                    >
+                      다음 고민
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </>
+              ))}
+          </div>
         </div>
       </section>
     </main>
