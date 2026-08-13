@@ -42,7 +42,12 @@ export default function PersonalPage() {
               Funnection 연애특집
             </p>
             <h1 className="text-romance-accent text-shadow-01 mdl:text-[44px] mt-1 text-2xl font-extrabold leading-none">
-              퍼스널 페이퍼
+              <Link
+                href="/random-message"
+                className="hover:text-romance-highlight transition"
+              >
+                퍼스널 페이퍼
+              </Link>
             </h1>
           </div>
 
