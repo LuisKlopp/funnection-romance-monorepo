@@ -59,13 +59,15 @@ export default function Home() {
         <div className="flex flex-col items-center text-center">
           <h1 className="text-romance-accent text-shadow-01 mdl:text-[46px] text-[34px] font-extrabold leading-8 tracking-normal">
             Funnection <br className="mdl:hidden" />{" "}
-            <span className="text-romance-accent text-[24px]">연애특집</span>
+            <span className="text-romance-accent text-[24px]">
+              연애특집 익명 고민
+            </span>
           </h1>
           <p className="text-romance-muted mb-1 mt-2 max-w-[320px] text-base font-medium">
-            연애 및 결혼과 관련된 고민을 남겨주세요.
+            연애, 결혼, 인생과 관련된 고민을 남겨주세요.
           </p>
           <p className="text-romance-muted text-sm">
-            (다른 고민이 있다면 그것도 괜찮아요!)
+            (구체적일수록 더 풍부한 대화가 가능해집니다!)
           </p>
         </div>
 
