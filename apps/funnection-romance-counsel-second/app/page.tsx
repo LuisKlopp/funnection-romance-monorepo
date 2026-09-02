@@ -102,6 +102,20 @@ export default function Home() {
         </button>
       </form>
 
+      {counselMutation.isPending && (
+        <div
+          className="submit-modal-overlay fixed inset-0 z-50 flex items-center justify-center"
+          role="status"
+          aria-live="polite"
+          aria-label="고민 제출 중"
+        >
+          <span
+            className="h-12 w-12 animate-spin rounded-full border-4 border-white/35 border-t-white"
+            aria-hidden="true"
+          />
+        </div>
+      )}
+
       {submitMessage && (
         <div
           className="submit-modal-overlay fixed inset-0 z-50 flex items-center justify-center px-5"

@@ -6,10 +6,33 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  getRomanceCounselQueryKey,
   getRomanceCounsels,
-  ROMANCE_COUNSEL_QUERY_KEY,
   type RomanceCounsel,
+  type RomanceCounselSource,
 } from "@/api";
+
+const COUNSEL_SOURCE_OPTIONS: {
+  label: string;
+  source: RomanceCounselSource;
+}[] = [
+  {
+    label: "First Time",
+    source: "default",
+  },
+  {
+    label: "Second Time",
+    source: "second",
+  },
+];
+
+const getCounselSource = (): RomanceCounselSource => {
+  if (typeof window === "undefined") return "default";
+
+  const searchParams = new URLSearchParams(window.location.search);
+
+  return searchParams.get("source") === "second" ? "second" : "default";
+};
 
 const shuffleCounsels = (counsels: RomanceCounsel[]) => {
   const shuffled = [...counsels];
@@ -26,15 +49,25 @@ const shuffleCounsels = (counsels: RomanceCounsel[]) => {
 };
 
 export default function CounselPage() {
+  const [counselSource, setCounselSource] =
+    useState<RomanceCounselSource | null>(null);
   const [shuffleSeed, setShuffleSeed] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCounselOpen, setIsCounselOpen] = useState(false);
   const counselsQuery = useQuery({
-    queryKey: ROMANCE_COUNSEL_QUERY_KEY,
-    queryFn: getRomanceCounsels,
+    queryKey: counselSource
+      ? getRomanceCounselQueryKey(counselSource)
+      : ["funnection-romance", "counsel", "pending"],
+    queryFn: () => getRomanceCounsels(counselSource ?? "default"),
+    enabled: counselSource !== null,
   });
 
+  useEffect(() => {
+    setCounselSource(getCounselSource());
+  }, []);
+
   const counsels = counselsQuery.data ?? [];
+  const isCounselsLoading = counselSource === null || counselsQuery.isLoading;
   const shuffledCounsels = useMemo(
     () => shuffleCounsels(counsels),
     [counsels, shuffleSeed]
@@ -45,7 +78,7 @@ export default function CounselPage() {
   useEffect(() => {
     setCurrentIndex(0);
     setIsCounselOpen(false);
-  }, [counsels.length, shuffleSeed]);
+  }, [counselSource, counsels.length, shuffleSeed]);
 
   const openCounsel = () => {
     if (shuffledCounsels.length === 0) return;
@@ -61,6 +94,20 @@ export default function CounselPage() {
 
   const reshuffleCounsels = () => {
     setShuffleSeed((prevSeed) => prevSeed + 1);
+  };
+
+  const selectCounselSource = (source: RomanceCounselSource) => {
+    setCounselSource(source);
+
+    const url = new URL(window.location.href);
+
+    if (source === "second") {
+      url.searchParams.set("source", "second");
+    } else {
+      url.searchParams.delete("source");
+    }
+
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
   };
 
   return (
@@ -93,10 +140,35 @@ export default function CounselPage() {
 
           <div className="flex-1" aria-hidden="true" />
 
+          <div
+            className="bg-romance-surface/85 shadow-soft-card flex h-12 items-center gap-1 rounded-full border border-white/80 p-1 backdrop-blur"
+            aria-label="고민 타임 선택"
+            role="group"
+          >
+            {COUNSEL_SOURCE_OPTIONS.map(({ label, source }) => {
+              const isSelected = counselSource === source;
+
+              return (
+                <button
+                  key={source}
+                  type="button"
+                  onClick={() => selectCounselSource(source)}
+                  className={`btn-press-in flex h-10 min-w-[86px] items-center justify-center rounded-full px-4 text-sm font-extrabold transition ${
+                    isSelected
+                      ? "bg-romance-accent text-white shadow-[0_8px_18px_rgba(242,109,139,0.24)]"
+                      : "text-romance-muted hover:text-romance-accent"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
           <button
             type="button"
             onClick={reshuffleCounsels}
-            disabled={counselsQuery.isLoading || counsels.length < 2}
+            disabled={isCounselsLoading || counsels.length < 2}
             className="btn-press-in bg-romance-surface/85 text-romance-muted shadow-soft-card hover:text-romance-accent mdl:h-12 mdl:w-12 flex h-10 w-10 items-center justify-center rounded-full border border-white/80 backdrop-blur disabled:opacity-45"
             aria-label="랜덤 순서 다시 섞기"
           >
@@ -115,7 +187,7 @@ export default function CounselPage() {
               </h1>
             </div>
 
-            {counselsQuery.isLoading && (
+            {isCounselsLoading && (
               <>
                 <div
                   className="shadow-soft-card h-[280px] w-full rounded-[28px] border border-white/70 bg-white/45"
@@ -138,7 +210,7 @@ export default function CounselPage() {
               </button>
             )}
 
-            {!counselsQuery.isLoading &&
+            {!isCounselsLoading &&
               !counselsQuery.isError &&
               counsels.length === 0 && (
                 <p className="text-romance-muted text-center text-3xl font-medium">
@@ -146,7 +218,7 @@ export default function CounselPage() {
                 </p>
               )}
 
-            {!counselsQuery.isLoading &&
+            {!isCounselsLoading &&
               !counselsQuery.isError &&
               currentCounsel &&
               (!isCounselOpen ? (
