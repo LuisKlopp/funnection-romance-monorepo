@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, Fragment, useEffect, useRef, useState } from "react";
 
 import type { RomanceAnswer } from "@/api";
 import {
@@ -65,6 +65,9 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
   const trimmedAnswer = answer.trim();
   const isSubmitDisabled =
     trimmedAnswer.length === 0 || answerMutation.isPending;
+  const questionText = questionQuery.isLoading
+    ? "질문을 불러오는 중입니다"
+    : getQuestionDisplayText(id, questionQuery.data?.question);
 
   useEffect(() => {
     if (!submitMessage) return;
@@ -223,10 +226,7 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
 
             <div className="mdl:flex relative mx-auto hidden h-full w-full max-w-[820px] flex-col items-center justify-center gap-8">
               <p className="font-jua leading-tightPlus text-center text-[36px] font-medium text-slate-700">
-                {id}.{" "}
-                {questionQuery.isLoading
-                  ? "질문을 불러오는 중입니다"
-                  : questionQuery.data?.question}
+                {id}. {renderMultilineText(questionText)}
               </p>
 
               {questionQuery.isError && (
@@ -282,6 +282,31 @@ export const QuestionDetailClient = ({ id }: QuestionDetailClientProps) => {
 
 const getSavedNickname = () =>
   localStorage.getItem(ROMANCE_NICKNAME_STORAGE_KEY)?.trim() ?? "";
+
+const getQuestionDisplayText = (id: number, question = "") => {
+  if (id !== 52) {
+    return question;
+  }
+
+  const normalizedQuestion = question.replace(/\\n/g, "\n");
+
+  if (normalizedQuestion.includes("\n")) {
+    return normalizedQuestion;
+  }
+
+  return normalizedQuestion.replace(
+    "연애, 결혼에 대해 생각이 바뀐",
+    "연애, 결혼에 대해\n생각이 바뀐"
+  );
+};
+
+const renderMultilineText = (text: string) =>
+  text.split("\n").map((line, index) => (
+    <Fragment key={`${line}-${index}`}>
+      {index > 0 && <br />}
+      {line}
+    </Fragment>
+  ));
 
 const shuffleAnswers = (answers: RomanceAnswer[]) => {
   const shuffledAnswers = [...answers];
