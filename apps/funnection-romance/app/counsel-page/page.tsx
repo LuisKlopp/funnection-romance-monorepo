@@ -1,7 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Home, RefreshCcw } from "lucide-react";
+import {
+  ArrowRight,
+  FoldHorizontal,
+  Home,
+  RefreshCcw,
+  UnfoldHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -54,6 +60,7 @@ export default function CounselPage() {
   const [shuffleSeed, setShuffleSeed] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCounselOpen, setIsCounselOpen] = useState(false);
+  const [isCounselNarrow, setIsCounselNarrow] = useState(false);
   const counselsQuery = useQuery({
     queryKey: counselSource
       ? getRomanceCounselQueryKey(counselSource)
@@ -174,6 +181,23 @@ export default function CounselPage() {
           >
             <RefreshCcw className="h-5 w-5" />
           </button>
+
+          <button
+            type="button"
+            onClick={() => setIsCounselNarrow((prevValue) => !prevValue)}
+            className="btn-press-in bg-romance-surface/85 text-romance-muted shadow-soft-card hover:text-romance-accent mdl:h-12 mdl:w-12 flex h-10 w-10 items-center justify-center rounded-full border border-white/80 backdrop-blur"
+            aria-label="고민 카드 좁은 폭"
+            aria-pressed={isCounselNarrow}
+            title={
+              isCounselNarrow ? "고민 카드 넓게 보기" : "고민 카드 좁게 보기"
+            }
+          >
+            {isCounselNarrow ? (
+              <UnfoldHorizontal className="h-5 w-5" />
+            ) : (
+              <FoldHorizontal className="h-5 w-5" />
+            )}
+          </button>
         </header>
 
         <div className="bg-romance-surface/55 shadow-soft-card mt-8 flex min-h-0 flex-1 flex-col rounded-[32px] border border-white/70 p-8 backdrop-blur">
@@ -231,7 +255,11 @@ export default function CounselPage() {
                 </button>
               ) : (
                 <>
-                  <div className="shadow-soft-card min-h-70 inline-flex max-h-full w-full max-w-full overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-8 py-7">
+                  <div
+                    className={`shadow-soft-card min-h-70 inline-flex max-h-full w-full overflow-y-auto rounded-[28px] border border-white/85 bg-white/90 px-8 py-7 transition-[max-width] duration-300 ease-out ${
+                      isCounselNarrow ? "max-w-[86%]" : "max-w-full"
+                    }`}
+                  >
                     <p className="text-romance-ink font-jua whitespace-pre-wrap break-words text-2xl font-medium">
                       {currentCounsel.content}
                     </p>
