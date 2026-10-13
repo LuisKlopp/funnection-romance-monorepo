@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, GripVertical, LoaderCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -27,7 +27,6 @@ export const LoveLanguageRanking = ({
   const [loveLanguages, setLoveLanguages] = useState<LoveLanguageName[]>([
     ...LOVE_LANGUAGES,
   ]);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -106,7 +105,7 @@ export const LoveLanguageRanking = ({
       </div>
 
       <p className="text-romance-muted leading-middlePlus mt-2 text-xs font-semibold mdl:text-sm">
-        카드를 드래그하거나 화살표를 눌러 순서를 바꿀 수 있어요.
+        화살표를 눌러 순서를 바꿀 수 있어요.
       </p>
 
       <ol className="mt-4 flex flex-col gap-2.5">
@@ -116,22 +115,10 @@ export const LoveLanguageRanking = ({
           return (
             <li
               key={loveLanguage}
-              draggable={!submitMutation.isPending && !isSubmitted}
-              onDragStart={() => setDraggedIndex(index)}
-              onDragEnd={() => setDraggedIndex(null)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => {
-                if (draggedIndex === null) return;
-                moveLanguage(draggedIndex, index);
-                setDraggedIndex(null);
-              }}
-              className={`shadow-soft-card flex min-h-[58px] items-center gap-2 rounded-2xl border border-white/85 px-2.5 py-2 transition mdl:min-h-[64px] mdl:px-3 ${
-                draggedIndex === index ? "opacity-55" : "opacity-100"
-              }`}
+              className="shadow-soft-card flex min-h-[58px] items-center gap-2 rounded-2xl border border-white/85 px-2.5 py-2 transition mdl:min-h-[64px] mdl:px-3"
               style={{ backgroundColor: style.background }}
             >
-              <span className="text-romance-muted flex shrink-0 items-center gap-1">
-                <GripVertical className="hidden h-4 w-4 mdl:block" aria-hidden="true" />
+              <span className="text-romance-muted flex shrink-0 items-center">
                 <span className="w-5 text-center text-base font-extrabold">
                   {index + 1}
                 </span>
